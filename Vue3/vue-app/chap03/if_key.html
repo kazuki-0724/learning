@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>Vue.js</title>
+</head>
+<body>
+<div id="app">
+  <fieldset>
+    <legend>支払方法</legend>
+    クレジットカード：
+    <input type="radio" name="pay" value="credit" v-model="pay" />
+    銀行振込：
+    <input type="radio" name="pay" value="bank" v-model="pay" />
+    <hr />
+    <div v-if="pay === 'credit'">
+      カード番号：
+      <input type="text" key="credit" />
+    </div>
+    <div v-else-if="pay === 'bank'">
+      口座番号：
+      <input type="text" key="bank" />
+    </div>
+  </fieldset>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+<script src="js/if_key.js"></script>
+</body>
+</html>

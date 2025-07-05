@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>Vue.js</title>
+</head>
+<body>
+<div id="app">
+  <form>
+    <label for="name">氏名：</label>
+    <input type="text" id="name" v-on:keyup.alt.81="help" v-model="name" />
+    <!-- <input type="text" v-on:keyup.alt.exact.81="help" v-model="name" /> -->
+  </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+<script src="js/event_sys.js"></script>
+</body>
+</html>

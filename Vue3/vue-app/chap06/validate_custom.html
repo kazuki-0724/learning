@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>Vue.js</title>
+</head>
+<body>
+<div id="app">
+  <form>
+    <label for="memo">メモ：</label>
+    <textarea id="memo" name="memo" rows="10" cols="30"
+      v-validate="'ngword:暴力,グロ,エロ'" data-vv-as="メモ"></textarea>
+    <span v-show="errors.has('memo')">{{ errors.first('memo') }}</span>
+  </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vee-validate@2.2.15/dist/vee-validate.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vee-validate@2.2.15/dist/locale/ja.js"></script>
+<script src="js/validate_custom.js"></script>
+</body>
+</html>

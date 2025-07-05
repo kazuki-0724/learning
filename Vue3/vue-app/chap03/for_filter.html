@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>Vue.js</title>
+<link rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<div id="app">
+  <table class="table">
+    <th>ISBN</th><th>書名</th><th>価格</th>
+    <tr v-for="b in expensiveBooks" >
+    <!-- <tr v-for="b in books" v-if="b.price >= 2500"> -->
+      <td>{{ b.isbn }}</td>
+      <td>{{ b.title }}</td>
+      <td>{{ b.price }}円</td>
+    </tr>
+  </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+<script src="js/for_filter.js"></script>
+</body>
+</html>
