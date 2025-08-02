@@ -1,6 +1,3 @@
-// フォルダごとに「フォルダ名.md」として出力するバージョン
-// node generate_code_markdown
-
 const fs = require('fs');
 const path = require('path');
 
@@ -58,32 +55,20 @@ const LANGUAGE_MAP = {
 };
 
 /**
- * 指定ディレクトリ配下の各フォルダごとに「フォルダ名.md」としてMarkdownファイルを出力
+ * 指定ディレクトリ配下の各フォルダのファイルを収集し、単一のMarkdownファイルにまとめる
  * @param {string} currentPath 現在の探索パス（絶対パス）
  * @param {string} relativePath ルートディレクトリからの相対パス
+ * @param {string} rootDir ルートディレクトリの絶対パス
  */
-function outputMarkdownPerFolder(currentPath, relativePath) {
+function collectFilesAndOutputMarkdown(currentPath, relativePath, rootDir) {
   let fileContents = '';
   let subfolders = [];
+  let hasFiles = false;
 
   try {
     const files = fs.readdirSync(currentPath);
 
-    // サブディレクトリを先に探索
-    files.forEach(file => {
-      const fullPath = path.join(currentPath, file);
-      const currentRelativePath = path.join(relativePath, file);
-      const stats = fs.statSync(fullPath);
-
-      if (stats.isDirectory()) {
-        const dirName = path.basename(fullPath);
-        if (!EXCLUDE_DIRS.has(dirName)) {
-          subfolders.push({ fullPath, currentRelativePath });
-        }
-      }
-    });
-
-    // ファイルを処理
+    // ファイルを先に処理
     files.forEach(file => {
       const fullPath = path.join(currentPath, file);
       const currentRelativePath = path.join(relativePath, file);
@@ -108,6 +93,7 @@ function outputMarkdownPerFolder(currentPath, relativePath) {
             fileContents += `\`\`\`${langName}\n`;
             fileContents += fileContent.trim() + '\n';
             fileContents += `\`\`\`\n\n`;
+            hasFiles = true;
           } catch (readError) {
             fileContents += `---<br>\n`;
             fileContents += `### ファイル: \`${currentRelativePath.replace(/\\/g, '/')}\`\n\n`;
@@ -118,21 +104,37 @@ function outputMarkdownPerFolder(currentPath, relativePath) {
     });
 
     // フォルダ内にファイルがあればMarkdownファイルとして出力
-    if (fileContents) {
-      const outputFolder = path.join(OUTPUT_DIR, relativePath);
-      fs.mkdirSync(outputFolder, { recursive: true });
-      // フォルダ名を取得して.mdファイル名に
-      const folderName = path.basename(currentPath);
-      const outputFile = path.join(outputFolder, `${folderName}.md`);
+    if (hasFiles) {
+      // ルートディレクトリからの相対パスを'/'で結合し、'.'を'_'に置換してファイル名にする
+      const baseDirName = path.basename(rootDir);
+      let outputFileName = path.join(relativePath, 'temp').replace(/\\/g, '/').replace(/\//g, '_');
+      // ルートディレクトリ名と、そこからのパスを連結
+      outputFileName = baseDirName + '_' + outputFileName.replace('_temp', '.md').replace('_' + baseDirName + '_', '_');
+      
+      const outputFile = path.join(OUTPUT_DIR, outputFileName);
       let md = `# ディレクトリ: ${relativePath.replace(/\\/g, '/')}\n\n`;
       md += fileContents;
       fs.writeFileSync(outputFile, md, 'utf8');
       console.log(`出力: ${outputFile}`);
     }
 
+    // サブディレクトリを探索
+    files.forEach(file => {
+      const fullPath = path.join(currentPath, file);
+      const currentRelativePath = path.join(relativePath, file);
+      const stats = fs.statSync(fullPath);
+
+      if (stats.isDirectory()) {
+        const dirName = path.basename(fullPath);
+        if (!EXCLUDE_DIRS.has(dirName)) {
+          subfolders.push({ fullPath, currentRelativePath });
+        }
+      }
+    });
+
     // サブフォルダも再帰的に処理
     subfolders.forEach(sub => {
-      outputMarkdownPerFolder(sub.fullPath, sub.currentRelativePath);
+      collectFilesAndOutputMarkdown(sub.fullPath, sub.currentRelativePath, rootDir);
     });
 
   } catch (dirReadError) {
@@ -143,10 +145,11 @@ function outputMarkdownPerFolder(currentPath, relativePath) {
 // --- メイン処理 ---
 function main() {
   const absoluteTargetPath = path.resolve(TARGET_DIR);
+  const rootDirName = path.basename(absoluteTargetPath);
 
   console.log(`指定されたディレクトリ: ${absoluteTargetPath}`);
   console.log(`出力ディレクトリ: ${OUTPUT_DIR}`);
-  console.log(`フォルダごとに「フォルダ名.md」としてMarkdownファイルを出力します...`);
+  console.log(`フォルダごとに「ルートからのパス.md」としてMarkdownファイルを出力します...`);
 
   if (!fs.existsSync(absoluteTargetPath)) {
     console.error(`エラー: 指定されたディレクトリが存在しません: ${absoluteTargetPath}`);
@@ -154,8 +157,8 @@ function main() {
   }
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  outputMarkdownPerFolder(absoluteTargetPath, path.basename(absoluteTargetPath));
-  console.log(`\n完了しました！各フォルダごとに「フォルダ名.md」が出力されました。`);
+  collectFilesAndOutputMarkdown(absoluteTargetPath, rootDirName, absoluteTargetPath);
+  console.log(`\n完了しました！各フォルダの内容が1つのディレクトリにMarkdownファイルとして出力されました。`);
 }
 
 main();
