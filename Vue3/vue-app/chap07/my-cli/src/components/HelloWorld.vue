@@ -31,10 +31,14 @@
 </template>
 
 <script>
+// 外から参照できるようにするためのexport default
+// ここで定義したコンポーネントは、他のファイルから
+// importして使用することができます。
+// このコンポーネントは、HelloWorld.vueという名前で保存されます。
 export default {
   name: 'HelloWorld',
   props: {
-    msg: String
+    msg: String // 親コンポーネントから渡されるmsgというプロパティを受け取る
   }
 }
 </script>

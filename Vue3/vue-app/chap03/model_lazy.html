@@ -8,6 +8,7 @@
 <div id="app">
   <form>
     <label for="name">氏名：</label>
+    <!-- lazyを使うことで変更の反映をフォーカスが外れた時に制御する。 -->
     <input type="text" id="name" v-model.lazy="myName" />
   </form>
   <div>こんにちは、{{ myName }} さん！</div>

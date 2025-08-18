@@ -10,6 +10,11 @@
   <my-counter step="1" v-on:plus="onplus"></my-counter>
   <my-counter step="2" v-on:plus="onplus"></my-counter>
   <my-counter step="-1" v-on:plus="onplus"></my-counter>
+  <!--
+    子コンポーネントから「this.$emit('plus', Number(this.step));」でemitされるため
+    plusのイベントを親コンポーネントで受け取ったら、oneplusのメソッドが呼び出される。
+    引数は子コンポーネントからemitされた値が渡され、onplusのメソッド側でそれを受け取る
+  -->
 </div>  
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
 <script src="js/emit_basic.js"></script>

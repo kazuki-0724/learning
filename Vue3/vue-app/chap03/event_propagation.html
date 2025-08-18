@@ -11,6 +11,10 @@
     親要素
     <div id="my" v-on:click="onMyClick">
     <!-- <div id="my" v-on:click.self="onMyClick"> -->
+    <!-- 
+      v-on:click.selfは明確に現在の要素だけを対象にする
+      v-on:click.stopはイベントの伝播を止める（親に伝搬させないため、応答速度を上げられることも...？）
+    -->
     <!-- <div id="my" v-on:click.stop="onMyClick"> -->
     <!-- <div id="my" v-on:click.self.stop="onMyClick"> -->
       現在要素

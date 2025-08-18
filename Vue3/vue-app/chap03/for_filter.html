@@ -12,6 +12,9 @@
     <th>ISBN</th><th>書名</th><th>価格</th>
     <tr v-for="b in expensiveBooks" >
     <!-- <tr v-for="b in books" v-if="b.price >= 2500"> -->
+    <!-- 
+      v-ifとv-forが同じ要素に使われている場合、v-ifが先に処理される
+    -->
       <td>{{ b.isbn }}</td>
       <td>{{ b.title }}</td>
       <td>{{ b.price }}円</td>

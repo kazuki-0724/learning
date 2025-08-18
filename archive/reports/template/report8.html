@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=800, initial-scale=1.0">
+    <title>商品検索</title>
+    <style>
+        body {
+            background: linear-gradient(120deg, #232526 0%, #414345 100%);
+            color: #f5f5f5;
+            font-family: 'Meiryo', 'Yu Gothic', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background: #00adb5;
+            color: #fff;
+            padding: 28px 0 12px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.1rem;
+            letter-spacing: 0.08em;
+        }
+        .main {
+            max-width: 900px;
+            margin: 32px auto 0 auto;
+            background: rgba(34, 40, 49, 0.97);
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            padding: 32px 32px 24px 32px;
+        }
+        .main h2 {
+            color: #ffd600;
+            border-left: 6px solid #00adb5;
+            padding-left: 12px;
+            margin-top: 16px;
+            margin-bottom: 18px;
+            font-size: 1.3rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #393e46;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        caption {
+            caption-side: top;
+            color: #00adb5;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+            letter-spacing: 0.04em;
+        }
+        th, td {
+            padding: 14px 10px;
+            text-align: center;
+        }
+        th {
+            background: #00adb5;
+            color: #fff;
+            font-size: 1.08rem;
+            letter-spacing: 0.04em;
+        }
+        tr:nth-child(even) td {
+            background: #232931;
+        }
+        tr:nth-child(odd) td {
+            background: #393e46;
+        }
+        td {
+            font-size: 1.05rem;
+        }
+        td img {
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            border: 1.5px solid #222831;
+            background: #232931;
+        }
+        .similarity {
+            color: #ffd600;
+            font-weight: bold;
+            font-size: 1.08rem;
+        }
+        .footer {
+            text-align: center;
+            color: #888;
+            margin-top: 40px;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 900px) {
+            .main {
+                padding: 16px 2vw;
+            }
+        }
+        a {
+            color: #ffd600;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        a:hover {
+            color: #00fff5;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>商品検索テスト レポート</h1>
+        <a href="summary.html">戻る</a>
+    </header>
+    <main class="main">
+        <h2>テストケース: 商品検索</h2>
+        <table>
+            <caption>No139</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_139}</td>
+                <td><img src="../screenshot/item_search_139.png" width="200" alt="item_search_139"></td>
+                <td><img src="../evidence/item_search_139.png" width="200" alt="item_search_139"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No140</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_140}</td>
+                <td><img src="../screenshot/item_search_140.png" width="200" alt="item_search_140"></td>
+                <td><img src="../evidence/item_search_140.png" width="200" alt="item_search_140"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No141</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_141}</td>
+                <td><img src="../screenshot/item_search_141.png" width="200" alt="item_search_141"></td>
+                <td><img src="../evidence/item_search_141.png" width="200" alt="item_search_141"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No142</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_142}</td>
+                <td><img src="../screenshot/item_search_142.png" width="200" alt="item_search_142"></td>
+                <td><img src="../evidence/item_search_142.png" width="200" alt="item_search_142"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No143</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_143}</td>
+                <td><img src="../screenshot/item_search_143.png" width="200" alt="item_search_143"></td>
+                <td><img src="../evidence/item_search_143.png" width="200" alt="item_search_143"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No146</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_146}</td>
+                <td><img src="../screenshot/item_search_146.png" width="200" alt="item_search_146"></td>
+                <td><img src="../evidence/item_search_146.png" width="200" alt="item_search_146"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No147</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_147}</td>
+                <td><img src="../screenshot/item_search_147.png" width="200" alt="item_search_147"></td>
+                <td><img src="../evidence/item_search_147.png" width="200" alt="item_search_147"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No148</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_148}</td>
+                <td><img src="../screenshot/item_search_148.png" width="200" alt="item_search_148"></td>
+                <td><img src="../evidence/item_search_148.png" width="200" alt="item_search_148"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No150</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_150}</td>
+                <td><img src="../screenshot/item_search_150.png" width="200" alt="item_search_150"></td>
+                <td><img src="../evidence/item_search_150.png" width="200" alt="item_search_150"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No151</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_151}</td>
+                <td><img src="../screenshot/item_search_151.png" width="200" alt="item_search_151"></td>
+                <td><img src="../evidence/item_search_151.png" width="200" alt="item_search_151"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No152</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_152}</td>
+                <td><img src="../screenshot/item_search_152.png" width="200" alt="item_search_152"></td>
+                <td><img src="../evidence/item_search_152.png" width="200" alt="item_search_152"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No154</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_154}</td>
+                <td><img src="../screenshot/item_search_154.png" width="200" alt="item_search_154"></td>
+                <td><img src="../evidence/item_search_154.png" width="200" alt="item_search_154"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No158</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_158}</td>
+                <td><img src="../screenshot/item_search_158.png" width="200" alt="item_search_158"></td>
+                <td><img src="../evidence/item_search_158.png" width="200" alt="item_search_158"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No160</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_160}</td>
+                <td><img src="../screenshot/item_search_160.png" width="200" alt="item_search_159"></td>
+                <td><img src="../evidence/item_search_160.png" width="200" alt="item_search_159"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No161</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_161}</td>
+                <td><img src="../screenshot/item_search_161.png" width="200" alt="item_search_161"></td>
+                <td><img src="../evidence/item_search_161.png" width="200" alt="item_search_161"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No164</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_164}</td>
+                <td><img src="../screenshot/item_search_164.png" width="200" alt="item_search_164"></td>
+                <td><img src="../evidence/item_search_164.png" width="200" alt="item_search_164"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No165</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_165}</td>
+                <td><img src="../screenshot/item_search_165.png" width="200" alt="item_search_165"></td>
+                <td><img src="../evidence/item_search_165.png" width="200" alt="item_search_165"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No166</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_166}</td>
+                <td><img src="../screenshot/item_search_166.png" width="200" alt="item_search_166"></td>
+                <td><img src="../evidence/item_search_166.png" width="200" alt="item_search_166"></td>
+            </tr>
+        </table>
+    </main>
+</body>
+</html>

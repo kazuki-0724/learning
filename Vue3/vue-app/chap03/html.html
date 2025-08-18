@@ -8,6 +8,9 @@
 <div id="app">
   <p>{{ message }}</p>
   <!-- <p v-html="message"></p> -->
+  <!--
+    v-htmlはHTMLを解釈して表示するため、XSS攻撃に注意
+  -->
 </div>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
 <script src="js/html.js"></script>

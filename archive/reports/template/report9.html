@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=800, initial-scale=1.0">
+    <title>カゴ画面</title>
+    <style>
+        body {
+            background: linear-gradient(120deg, #232526 0%, #414345 100%);
+            color: #f5f5f5;
+            font-family: 'Meiryo', 'Yu Gothic', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background: #00adb5;
+            color: #fff;
+            padding: 28px 0 12px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.1rem;
+            letter-spacing: 0.08em;
+        }
+        .main {
+            max-width: 900px;
+            margin: 32px auto 0 auto;
+            background: rgba(34, 40, 49, 0.97);
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            padding: 32px 32px 24px 32px;
+        }
+        .main h2 {
+            color: #ffd600;
+            border-left: 6px solid #00adb5;
+            padding-left: 12px;
+            margin-top: 16px;
+            margin-bottom: 18px;
+            font-size: 1.3rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #393e46;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        caption {
+            caption-side: top;
+            color: #00adb5;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+            letter-spacing: 0.04em;
+        }
+        th, td {
+            padding: 14px 10px;
+            text-align: center;
+        }
+        th {
+            background: #00adb5;
+            color: #fff;
+            font-size: 1.08rem;
+            letter-spacing: 0.04em;
+        }
+        tr:nth-child(even) td {
+            background: #232931;
+        }
+        tr:nth-child(odd) td {
+            background: #393e46;
+        }
+        td {
+            font-size: 1.05rem;
+        }
+        td img {
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            border: 1.5px solid #222831;
+            background: #232931;
+        }
+        .similarity {
+            color: #ffd600;
+            font-weight: bold;
+            font-size: 1.08rem;
+        }
+        .footer {
+            text-align: center;
+            color: #888;
+            margin-top: 40px;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 900px) {
+            .main {
+                padding: 16px 2vw;
+            }
+        }
+        a {
+            color: #ffd600;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        a:hover {
+            color: #00fff5;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>カゴ画面テスト レポート</h1>
+        <a href="summary.html">戻る</a>
+    </header>
+    <main class="main">
+        <h2>テストケース: カゴ画面</h2>
+        <table>
+            <caption>No168</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_168}</td>
+                <td><img src="../screenshot/cart_168.png" width="200" alt="cart_168"></td>
+                <td><img src="../evidence/cart_168.png" width="200" alt="cart_168"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No171</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_171}</td>
+                <td><img src="../screenshot/cart_171.png" width="200" alt="cart_171"></td>
+                <td><img src="../evidence/cart_171.png" width="200" alt="cart_171"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No174</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_174}</td>
+                <td><img src="../screenshot/cart_174.png" width="200" alt="cart_174"></td>
+                <td><img src="../evidence/cart_174.png" width="200" alt="cart_174"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No177</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_177}</td>
+                <td><img src="../screenshot/cart_177.png" width="200" alt="cart_177"></td>
+                <td><img src="../evidence/cart_177.png" width="200" alt="cart_177"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No188</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_188}</td>
+                <td><img src="../screenshot/cart_188.png" width="200" alt="cart_177"></td>
+                <td><img src="../evidence/cart_188.png" width="200" alt="cart_177"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No189</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_189}</td>
+                <td><img src="../screenshot/cart_189.png" width="200" alt="cart_177"></td>
+                <td><img src="../evidence/cart_189.png" width="200" alt="cart_177"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No190</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_190}</td>
+                <td><img src="../screenshot/cart_190.png" width="200" alt="cart_177"></td>
+                <td><img src="../evidence/cart_190.png" width="200" alt="cart_177"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No191</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_191}</td>
+                <td><img src="../screenshot/cart_191.png" width="200" alt="cart_177"></td>
+                <td><img src="../evidence/cart_191.png" width="200" alt="cart_177"></td>
+            </tr>
+        </table>
+                <table>
+            <caption>No192</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_192}</td>
+                <td><img src="../screenshot/cart_192.png" width="200" alt="cart_177"></td>
+                <td><img src="../evidence/cart_192.png" width="200" alt="cart_177"></td>
+            </tr>
+        </table>
+                <table>
+            <caption>No193</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_193}</td>
+                <td><img src="../screenshot/cart_193.png" width="200" alt="cart_177"></td>
+                <td><img src="../evidence/cart_193.png" width="200" alt="cart_177"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No194</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_194}</td>
+                <td><img src="../screenshot/cart_194.png" width="200" alt="cart_194"></td>
+                <td><img src="../evidence/cart_194.png" width="200" alt="cart_194"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No195</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_195}</td>
+                <td><img src="../screenshot/cart_195.png" width="200" alt="cart_195"></td>
+                <td><img src="../evidence/cart_195.png" width="200" alt="cart_195"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No196</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_196}</td>
+                <td><img src="../screenshot/cart_196.png" width="200" alt="cart_196"></td>
+                <td><img src="../evidence/cart_196.png" width="200" alt="cart_196"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No198</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_198}</td>
+                <td><img src="../screenshot/cart_198.png" width="200" alt="cart_198"></td>
+                <td><img src="../evidence/cart_198.png" width="200" alt="cart_198"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No199</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_199}</td>
+                <td><img src="../screenshot/cart_199.png" width="200" alt="cart_199"></td>
+                <td><img src="../evidence/cart_199.png" width="200" alt="cart_199"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No201</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_201}</td>
+                <td><img src="../screenshot/cart_201.png" width="200" alt="cart_201"></td>
+                <td><img src="../evidence/cart_201.png" width="200" alt="cart_201"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No203</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_203}</td>
+                <td><img src="../screenshot/cart_203.png" width="200" alt="cart_203"></td>
+                <td><img src="../evidence/cart_203.png" width="200" alt="cart_203"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No207</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_207}</td>
+                <td><img src="../screenshot/cart_207.png" width="200" alt="cart_207"></td>
+                <td><img src="../evidence/cart_207.png" width="200" alt="cart_207"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No209</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_209}</td>
+                <td><img src="../screenshot/cart_209.png" width="200" alt="cart_209"></td>
+                <td><img src="../evidence/cart_209.png" width="200" alt="cart_209"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No213</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_213}</td>
+                <td><img src="../screenshot/cart_213.png" width="200" alt="cart_213"></td>
+                <td><img src="../evidence/cart_213.png" width="200" alt="cart_213"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No214</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_214}</td>
+                <td><img src="../screenshot/cart_214.png" width="200" alt="cart_214"></td>
+                <td><img src="../evidence/cart_214.png" width="200" alt="cart_214"></td>
+            </tr>
+        </table>
+                <table>
+            <caption>No218</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_218}</td>
+                <td><img src="../screenshot/cart_218.png" width="200" alt="cart_214"></td>
+                <td><img src="../evidence/cart_218.png" width="200" alt="cart_214"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No222</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_222}</td>
+                <td><img src="../screenshot/cart_222.png" width="200" alt="cart_214"></td>
+                <td><img src="../evidence/cart_222.png" width="200" alt="cart_214"></td>
+            </tr>
+        </table>
+                <table>
+            <caption>No228</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_228}</td>
+                <td><img src="../screenshot/cart_228.png" width="200" alt="cart_214"></td>
+                <td><img src="../evidence/cart_228.png" width="200" alt="cart_214"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No229</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_229}</td>
+                <td><img src="../screenshot/cart_229.png" width="200" alt="cart_229"></td>
+                <td><img src="../evidence/cart_229.png" width="200" alt="cart_229"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No230</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_230}</td>
+                <td><img src="../screenshot/cart_230.png" width="200" alt="cart_230"></td>
+                <td><img src="../evidence/cart_230.png" width="200" alt="cart_230"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No231</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_231}</td>
+                <td><img src="../screenshot/cart_231.png" width="200" alt="cart_231"></td>
+                <td><img src="../evidence/cart_231.png" width="200" alt="cart_231"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No234</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_234}</td>
+                <td><img src="../screenshot/cart_234.png" width="200" alt="cart_234"></td>
+                <td><img src="../evidence/cart_234.png" width="200" alt="cart_234"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No235</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_235}</td>
+                <td><img src="../screenshot/cart_235.png" width="200" alt="cart_235"></td>
+                <td><img src="../evidence/cart_235.png" width="200" alt="cart_235"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No236</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_236}</td>
+                <td><img src="../screenshot/cart_236.png" width="200" alt="cart_236"></td>
+                <td><img src="../evidence/cart_236.png" width="200" alt="cart_236"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No237</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_237}</td>
+                <td><img src="../screenshot/cart_237.png" width="200" alt="cart_237"></td>
+                <td><img src="../evidence/cart_237.png" width="200" alt="cart_237"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No239</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_239}</td>
+                <td><img src="../screenshot/cart_239.png" width="200" alt="cart_239"></td>
+                <td><img src="../evidence/cart_239.png" width="200" alt="cart_239"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No241</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_241}</td>
+                <td><img src="../screenshot/cart_241.png" width="200" alt="cart_241"></td>
+                <td><img src="../evidence/cart_241.png" width="200" alt="cart_241"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No242</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_242}</td>
+                <td><img src="../screenshot/cart_242.png" width="200" alt="cart_242"></td>
+                <td><img src="../evidence/cart_242.png" width="200" alt="cart_242"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No244</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_244}</td>
+                <td><img src="../screenshot/cart_244.png" width="200" alt="cart_244"></td>
+                <td><img src="../evidence/cart_244.png" width="200" alt="cart_244"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No245</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_245}</td>
+                <td><img src="../screenshot/cart_245.png" width="200" alt="cart_245"></td>
+                <td><img src="../evidence/cart_245.png" width="200" alt="cart_245"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No247</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_247}</td>
+                <td><img src="../screenshot/cart_247.png" width="200" alt="cart_247"></td>
+                <td><img src="../evidence/cart_247.png" width="200" alt="cart_247"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No251</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_251}</td>
+                <td><img src="../screenshot/cart_251.png" width="200" alt="cart_251"></td>
+                <td><img src="../evidence/cart_251.png" width="200" alt="cart_251"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No253</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_253}</td>
+                <td><img src="../screenshot/cart_253.png" width="200" alt="cart_253"></td>
+                <td><img src="../evidence/cart_253.png" width="200" alt="cart_253"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No257</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_257}</td>
+                <td><img src="../screenshot/cart_257.png" width="200" alt="cart_257"></td>
+                <td><img src="../evidence/cart_257.png" width="200" alt="cart_257"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No259</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_259}</td>
+                <td><img src="../screenshot/cart_259.png" width="200" alt="cart_259"></td>
+                <td><img src="../evidence/cart_259.png" width="200" alt="cart_259"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No263</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_263}</td>
+                <td><img src="../screenshot/cart_263.png" width="200" alt="cart_263"></td>
+                <td><img src="../evidence/cart_263.png" width="200" alt="cart_263"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No264</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_264}</td>
+                <td><img src="../screenshot/cart_264.png" width="200" alt="cart_264"></td>
+                <td><img src="../evidence/cart_264.png" width="200" alt="cart_264"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No266</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_266}</td>
+                <td><img src="../screenshot/cart_266.png" width="200" alt="cart_266"></td>
+                <td><img src="../evidence/cart_266.png" width="200" alt="cart_266"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No267</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_267}</td>
+                <td><img src="../screenshot/cart_267.png" width="200" alt="cart_267"></td>
+                <td><img src="../evidence/cart_267.png" width="200" alt="cart_267"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No268</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_268}</td>
+                <td><img src="../screenshot/cart_268.png" width="200" alt="cart_268"></td>
+                <td><img src="../evidence/cart_268.png" width="200" alt="cart_268"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No269</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_269}</td>
+                <td><img src="../screenshot/cart_269.png" width="200" alt="cart_269"></td>
+                <td><img src="../evidence/cart_269.png" width="200" alt="cart_269"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No272</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_272}</td>
+                <td><img src="../screenshot/cart_272.png" width="200" alt="cart_272"></td>
+                <td><img src="../evidence/cart_272.png" width="200" alt="cart_272"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No273</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_273}</td>
+                <td><img src="../screenshot/cart_273.png" width="200" alt="cart_273"></td>
+                <td><img src="../evidence/cart_273.png" width="200" alt="cart_273"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No274</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_274}</td>
+                <td><img src="../screenshot/cart_274.png" width="200" alt="cart_274"></td>
+                <td><img src="../evidence/cart_274.png" width="200" alt="cart_274"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No275</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_275}</td>
+                <td><img src="../screenshot/cart_275.png" width="200" alt="cart_275"></td>
+                <td><img src="../evidence/cart_275.png" width="200" alt="cart_275"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No277</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_277}</td>
+                <td><img src="../screenshot/cart_277.png" width="200" alt="cart_277"></td>
+                <td><img src="../evidence/cart_277.png" width="200" alt="cart_277"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No279</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_279}</td>
+                <td><img src="../screenshot/cart_279.png" width="200" alt="cart_279"></td>
+                <td><img src="../evidence/cart_279.png" width="200" alt="cart_279"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No280-1</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_280-1}</td>
+                <td><img src="../screenshot/cart_280-1.png" width="200" alt="cart_280"></td>
+                <td><img src="../evidence/cart_280-1.png" width="200" alt="cart_280"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No280-2</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_280-2}</td>
+                <td><img src="../screenshot/cart_280-2.png" width="200" alt="cart_280"></td>
+                <td><img src="../evidence/cart_280-2.png" width="200" alt="cart_280"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No282</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_282}</td>
+                <td><img src="../screenshot/cart_282.png" width="200" alt="cart_282"></td>
+                <td><img src="../evidence/cart_282.png" width="200" alt="cart_282"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No283-1</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_283-1}</td>
+                <td><img src="../screenshot/cart_283-1.png" width="200" alt="cart_283"></td>
+                <td><img src="../evidence/cart_283-1.png" width="200" alt="cart_283"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No283-2</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_283-2}</td>
+                <td><img src="../screenshot/cart_283-2.png" width="200" alt="cart_280"></td>
+                <td><img src="../evidence/cart_283-2.png" width="200" alt="cart_280"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No284</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_284}</td>
+                <td><img src="../screenshot/cart_284.png" width="200" alt="cart_284"></td>
+                <td><img src="../evidence/cart_284.png" width="200" alt="cart_284"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No286</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_286}</td>
+                <td><img src="../screenshot/cart_286.png" width="200" alt="cart_286"></td>
+                <td><img src="../evidence/cart_286.png" width="200" alt="cart_286"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No289</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_289}</td>
+                <td><img src="../screenshot/cart_289.png" width="200" alt="cart_289"></td>
+                <td><img src="../evidence/cart_289.png" width="200" alt="cart_289"></td>
+            </tr>
+        </table>
+                <table>
+            <caption>No291</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_291}</td>
+                <td><img src="../screenshot/cart_291.png" width="200" alt="cart_291"></td>
+                <td><img src="../evidence/cart_291.png" width="200" alt="cart_291"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No292</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_292}</td>
+                <td><img src="../screenshot/cart_292.png" width="200" alt="cart_292"></td>
+                <td><img src="../evidence/cart_292.png" width="200" alt="cart_292"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No293</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_293}</td>
+                <td><img src="../screenshot/cart_293.png" width="200" alt="cart_293"></td>
+                <td><img src="../evidence/cart_293.png" width="200" alt="cart_293"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No294</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_294}</td>
+                <td><img src="../screenshot/cart_294.png" width="200" alt="cart_294"></td>
+                <td><img src="../evidence/cart_294.png" width="200" alt="cart_294"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No296</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_296}</td>
+                <td><img src="../screenshot/cart_296.png" width="200" alt="cart_296"></td>
+                <td><img src="../evidence/cart_296.png" width="200" alt="cart_296"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No297</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_297}</td>
+                <td><img src="../screenshot/cart_297.png" width="200" alt="cart_297"></td>
+                <td><img src="../evidence/cart_297.png" width="200" alt="cart_297"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No298</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_298}</td>
+                <td><img src="../screenshot/cart_298.png" width="200" alt="cart_298"></td>
+                <td><img src="../evidence/cart_298.png" width="200" alt="cart_298"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No299</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_299}</td>
+                <td><img src="../screenshot/cart_299.png" width="200" alt="cart_299"></td>
+                <td><img src="../evidence/cart_299.png" width="200" alt="cart_299"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No302</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_302}</td>
+                <td><img src="../screenshot/cart_302.png" width="200" alt="cart_302"></td>
+                <td><img src="../evidence/cart_302.png" width="200" alt="cart_302"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No303</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_303}</td>
+                <td><img src="../screenshot/cart_303.png" width="200" alt="cart_303"></td>
+                <td><img src="../evidence/cart_303.png" width="200" alt="cart_303"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No306</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_306}</td>
+                <td><img src="../screenshot/cart_306.png" width="200" alt="cart_306"></td>
+                <td><img src="../evidence/cart_306.png" width="200" alt="cart_306"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No307</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_307}</td>
+                <td><img src="../screenshot/cart_307.png" width="200" alt="cart_307"></td>
+                <td><img src="../evidence/cart_307.png" width="200" alt="cart_307"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No308</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_308}</td>
+                <td><img src="../screenshot/cart_308.png" width="200" alt="cart_308"></td>
+                <td><img src="../evidence/cart_308.png" width="200" alt="cart_308"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No313</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_313}</td>
+                <td><img src="../screenshot/cart_313.png" width="200" alt="cart_313"></td>
+                <td><img src="../evidence/cart_313.png" width="200" alt="cart_313"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No314</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_314}</td>
+                <td><img src="../screenshot/cart_314.png" width="200" alt="cart_314"></td>
+                <td><img src="../evidence/cart_314.png" width="200" alt="cart_314"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No315</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_315}</td>
+                <td><img src="../screenshot/cart_315.png" width="200" alt="cart_315"></td>
+                <td><img src="../evidence/cart_315.png" width="200" alt="cart_315"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No320</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_320}</td>
+                <td><img src="../screenshot/cart_320.png" width="200" alt="cart_320"></td>
+                <td><img src="../evidence/cart_320.png" width="200" alt="cart_320"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No321-1</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_321_1}</td>
+                <td><img src="../screenshot/cart_321-1.png" width="200" alt="cart_321-1"></td>
+                <td><img src="../evidence/cart_321-1.png" width="200" alt="cart_321-1"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No321-2</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_321_2}</td>
+                <td><img src="../screenshot/cart_321-2.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_321-2.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No324</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_324}</td>
+                <td><img src="../screenshot/cart_324.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_324.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No325</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_325}</td>
+                <td><img src="../screenshot/cart_325.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_325.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No327</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_327}</td>
+                <td><img src="../screenshot/cart_327.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_327.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No328</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_328}</td>
+                <td><img src="../screenshot/cart_328.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_328.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No329</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_329}</td>
+                <td><img src="../screenshot/cart_329.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_329.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No331</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_331}</td>
+                <td><img src="../screenshot/cart_331.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_331.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No334</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_324}</td>
+                <td><img src="../screenshot/cart_334.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_334.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No336</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_336}</td>
+                <td><img src="../screenshot/cart_336.png" width="200" alt="cart_336"></td>
+                <td><img src="../evidence/cart_336.png" width="200" alt="cart_336"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No337</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_337}</td>
+                <td><img src="../screenshot/cart_337.png" width="200" alt="cart_337"></td>
+                <td><img src="../evidence/cart_337.png" width="200" alt="cart_337"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No342</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_342}</td>
+                <td><img src="../screenshot/cart_342.png" width="200" alt="cart_342"></td>
+                <td><img src="../evidence/cart_342.png" width="200" alt="cart_342"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No343</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_343}</td>
+                <td><img src="../screenshot/cart_343.png" width="200" alt="cart_343"></td>
+                <td><img src="../evidence/cart_343.png" width="200" alt="cart_343"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No345</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_345}</td>
+                <td><img src="../screenshot/cart_345.png" width="200" alt="cart_345"></td>
+                <td><img src="../evidence/cart_345.png" width="200" alt="cart_345"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No346</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_346}</td>
+                <td><img src="../screenshot/cart_346.png" width="200" alt="cart_346"></td>
+                <td><img src="../evidence/cart_346.png" width="200" alt="cart_346"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No348</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_348}</td>
+                <td><img src="../screenshot/cart_348.png" width="200" alt="cart_348"></td>
+                <td><img src="../evidence/cart_348.png" width="200" alt="cart_348"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No349</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_349}</td>
+                <td><img src="../screenshot/cart_349.png" width="200" alt="cart_349"></td>
+                <td><img src="../evidence/cart_349.png" width="200" alt="cart_349"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No350</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_350}</td>
+                <td><img src="../screenshot/cart_350.png" width="200" alt="cart_350"></td>
+                <td><img src="../evidence/cart_350.png" width="200" alt="cart_350"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No351</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_351}</td>
+                <td><img src="../screenshot/cart_351.png" width="200" alt="cart_351"></td>
+                <td><img src="../evidence/cart_351.png" width="200" alt="cart_351"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No353</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_353}</td>
+                <td><img src="../screenshot/cart_353.png" width="200" alt="cart_353"></td>
+                <td><img src="../evidence/cart_353.png" width="200" alt="cart_353"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No354-1</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_354-1}</td>
+                <td><img src="../screenshot/cart_354-1.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_354-1.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No354-2</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_354-2}</td>
+                <td><img src="../screenshot/cart_354-2.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_354-2.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+        <table>
+            <caption>No359</caption>
+            <tr>
+                <th>類似率</th>
+                <th>結果</th>
+                <th>正解</th>
+            </tr>
+            <tr>
+                <td class="similarity">{similarity_359}</td>
+                <td><img src="../screenshot/cart_359.png" width="200" alt="cart_321-2"></td>
+                <td><img src="../evidence/cart_359.png" width="200" alt="cart_321-2"></td>
+            </tr>
+        </table>
+    </main>
+</body>
+</html>

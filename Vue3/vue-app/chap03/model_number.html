@@ -8,6 +8,12 @@
 <div id="app">
   <form>
     <label for="temperature">サウナの温度：</label>
+    <!-- 
+      強制的に入力値を数値として扱わせるための「v-model.number」
+      動作オプションは「.」でチェイン可能 
+      「v-model」はテンプレートの双方向データバインディングを提供するディレクティブで、
+      「:value」はHTMLへの短方向のデータバインディングを提供する（画面側での変更によってデータは変わらない）。
+    -->
     <input type="text" id="temperature" v-model.number="temperature"
       v-on:change="onchange" />
   </form>

@@ -11,6 +11,9 @@
     <input type="text" id="name" v-model="name" />
   </form>
   <div v-once>はじめまして、{{ name }} さん。</div>
+  <!--
+    APIで最初に一度だけ初期化されるような値ならv-onceでいい
+  -->
   <div>はじめまして、{{ name }} さん。</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>

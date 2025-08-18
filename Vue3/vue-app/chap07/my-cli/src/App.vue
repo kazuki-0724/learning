@@ -2,7 +2,7 @@
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
     <p>こんにちは、Vue.js！</p>
-    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+    <HelloWorld msg="Welcome to Your Vue.js App"/>
   </div>
 </template>
 
@@ -13,12 +13,16 @@ p {
 }
 </style>
 
-<!--
+
 <script>
+// モジュールのインポート
 import HelloWorld from './components/HelloWorld.vue'
 
+// main.jsでインポートできるようにexportしておく
 export default {
   name: 'app',
+  // App.vueでHelloWorldコンポーネントを使用するために
+  // componentsオプションで登録します。
   components: {
     HelloWorld
   }
@@ -35,4 +39,3 @@ export default {
   margin-top: 60px;
 }
 </style>
--->
