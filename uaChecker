@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ユーザーエージェント確認ツール</title>
+    <!-- Tailwind CSS CDNを読み込み -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* フォント設定と背景のグラデーション */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="w-full max-w-4xl bg-white shadow-2xl rounded-xl p-8 md:p-12 transition-all duration-300">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-indigo-500 pb-2">
+            ブラウザのユーザーエージェント情報
+        </h1>
+        <p class="text-gray-600 mb-8">
+            このツールは、ブラウザがサーバーに送信する「ユーザーエージェント文字列」を表示します。
+        </p>
+
+        <!-- 推定される主要情報表示エリア -->
+        <div class="mb-8 p-6 bg-indigo-50 rounded-lg border border-indigo-200">
+            <h2 class="text-xl font-semibold text-indigo-700 mb-4">主要情報 (推定)</h2>
+            <dl class="space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center">
+                    <dt class="font-medium text-gray-700 w-40 flex-shrink-0">推定されるOS:</dt>
+                    <dd id="os-display" class="text-lg font-bold text-gray-900 mt-1 sm:mt-0">
+                        <span class="text-gray-400">取得中...</span>
+                    </dd>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center">
+                    <dt class="font-medium text-gray-700 w-40 flex-shrink-0">推定されるブラウザ:</dt>
+                    <dd id="browser-display" class="text-lg font-bold text-gray-900 mt-1 sm:mt-0">
+                        <span class="text-gray-400">取得中...</span>
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- 完全なユーザーエージェント文字列表示エリア -->
+        <div class="mb-6">
+            <label for="user-agent-string" class="block text-lg font-medium text-gray-800 mb-3">
+                完全なユーザーエージェント文字列:
+            </label>
+            <textarea id="user-agent-string" rows="5" readonly
+                      class="w-full p-4 font-mono text-sm bg-gray-900 text-green-300 rounded-lg shadow-inner resize-none border-2 border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
+                ユーザーエージェントを読み込み中...
+            </textarea>
+        </div>
+
+        <!-- コピーボタン -->
+        <button id="copy-button"
+                class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-300 active:bg-indigo-800 disabled:opacity-50">
+            文字列をクリップボードにコピー
+        </button>
+        <div id="copy-message" class="mt-4 text-sm font-medium text-green-600 hidden">
+            コピーしました！
+        </div>
+
+        <p class="text-sm text-gray-500 mt-6 pt-4 border-t border-gray-200">
+            注意: この文字列は、JavaScriptの `navigator.userAgent` プロパティから取得された、クライアントサイドの情報です。
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userAgentString = navigator.userAgent;
+            const uaDisplay = document.getElementById('user-agent-string');
+            const osDisplay = document.getElementById('os-display');
+            const browserDisplay = document.getElementById('browser-display');
+            const copyButton = document.getElementById('copy-button');
+            const copyMessage = document.getElementById('copy-message');
+
+            // 1. 生のユーザーエージェント文字列を表示
+            uaDisplay.value = userAgentString;
+
+            // 2. ユーザーエージェントの解析関数
+            function parseUserAgent(ua) {
+                let os = '不明なOS';
+                let browser = '不明なブラウザ';
+
+                // OSの推定
+                if (ua.includes('Win')) {
+                    os = 'Windows';
+                } else if (ua.includes('Mac') || ua.includes('iPad') || ua.includes('iPhone')) {
+                    os = 'macOS / iOS / iPadOS';
+                } else if (ua.includes('Linux')) {
+                    os = 'Linux / Android';
+                } else if (ua.includes('Android')) {
+                    os = 'Android';
+                } else if (ua.includes('X11')) {
+                    os = 'Unix / Linux';
+                }
+
+                // ブラウザの推定 (主要なもののみ)
+                if (ua.includes('Chrome') && !ua.includes('Edg')) {
+                    // Chrome and not Edge
+                    const versionMatch = ua.match(/Chrome\/([\d.]+)/);
+                    browser = 'Chrome' + (versionMatch ? ` (v${versionMatch[1]})` : '');
+                } else if (ua.includes('Firefox')) {
+                    const versionMatch = ua.match(/Firefox\/([\d.]+)/);
+                    browser = 'Firefox' + (versionMatch ? ` (v${versionMatch[1]})` : '');
+                } else if (ua.includes('Edg')) {
+                    // Microsoft Edge
+                    const versionMatch = ua.match(/Edg\/([\d.]+)/);
+                    browser = 'Edge' + (versionMatch ? ` (v${versionMatch[1]})` : '');
+                } else if (ua.includes('Safari') && !ua.includes('Chrome')) {
+                    // Safari (and not Chrome)
+                    const versionMatch = ua.match(/Version\/([\d.]+)/);
+                    browser = 'Safari' + (versionMatch ? ` (v${versionMatch[1]})` : '');
+                } else if (ua.includes('MSIE') || ua.includes('Trident')) {
+                    browser = 'Internet Explorer';
+                }
+
+                return { os, browser };
+            }
+
+            // 3. 解析結果の表示
+            const { os, browser } = parseUserAgent(userAgentString);
+            osDisplay.textContent = os;
+            browserDisplay.textContent = browser;
+
+            // 4. コピー機能の実装
+            copyButton.addEventListener('click', () => {
+                // document.execCommand('copy') は非推奨ですが、iframe環境で最も互換性があります
+                try {
+                    uaDisplay.select();
+                    document.execCommand('copy');
+                    
+                    // コピー成功メッセージを表示
+                    copyMessage.classList.remove('hidden');
+                    setTimeout(() => {
+                        copyMessage.classList.add('hidden');
+                    }, 2000);
+                } catch (err) {
+                    console.error('コピーに失敗しました:', err);
+                    // エラーメッセージをユーザーに見せる場合はここに実装
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
