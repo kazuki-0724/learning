@@ -1,0 +1,4 @@
+token = glpat-nuzgXrXTaWYPxgj_AZu4CG86MQp1Omdtam10Cw.01.121a2y1xg
+url = https://gitlab.com/kzk-dev/MyChat/-/archive/main/MyChat-main.zip?ref_type=heads
+url = https://gitlab.com/kzk-dev/MyChat2/-/archive/main/MyChat2-main.zip?ref_type=heads
+url = https://gitlab.com/kzk-dev/hellocicd/-/archive/main/hellocicd-main.zip?ref_type=heads
