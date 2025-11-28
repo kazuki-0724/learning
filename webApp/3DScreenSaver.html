@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>モダン・パーティクル・スクリーンセーバー</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0d0d1a; /* ダークネイビーの背景 */
+            font-family: sans-serif;
+            color: white;
+        }
+
+        /* Three.jsのキャンバスが画面全体を覆うように設定 */
+        #container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* フルスクリーンコントロール */
+        #controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: opacity 0.3s; /* 非表示時のトランジション */
+        }
+
+        /* フルスクリーン中はコントロールを非表示にする */
+        :fullscreen #controls {
+            opacity: 0;
+            pointer-events: none; /* クリック操作を無効化 */
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            background-color: rgba(60, 180, 255, 0.7); /* 青系のモダンな色 */
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .control-btn:hover {
+            background-color: rgba(60, 180, 255, 0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(1px);
+        }
+    </style>
+    <!-- Import Maps for Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    
+    <!-- Three.js コンテナ -->
+    <div id="container"></div>
+
+    <!-- コントロールUI -->
+    <div id="controls">
+        <button id="fullscreen-btn" class="control-btn">フルスクリーンにする</button>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        let camera, scene, renderer;
+        let particles = [];
+        let complexObjects = []; // 新しい立体図形を格納する配列
+        const particleCount = 200; // パーティクルの数
+        const connectionDistance = 150; // 接続する最大距離
+        let clock = new THREE.Clock(); // カメラアニメーション用の時計
+        
+        const lineMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x3cb4ff, // 明るい青
+            transparent: true,
+            opacity: 0.1 
+        });
+
+        // パーティクルデータ構造
+        class Particle {
+            constructor(position) {
+                this.mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(2, 8, 8), // 小さな球体
+                    new THREE.MeshBasicMaterial({ color: 0x7afcff }) // 明るいシアン
+                );
+                this.mesh.position.copy(position);
+                this.velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.2,
+                    (Math.random() - 0.5) * 0.2,
+                    (Math.random() - 0.5) * 0.2
+                );
+                scene.add(this.mesh);
+            }
+
+            update() {
+                this.mesh.position.add(this.velocity);
+
+                // 境界をチェックし、跳ね返る
+                const max = 800;
+                if (this.mesh.position.x > max || this.mesh.position.x < -max) this.velocity.x *= -1;
+                if (this.mesh.position.y > max || this.mesh.position.y < -max) this.velocity.y *= -1;
+                // Z軸の境界を拡大し、カメラの動きに対応
+                if (this.mesh.position.z > 800 || this.mesh.position.z < -800) this.velocity.z *= -1; 
+            }
+        }
+        
+        // 立体図形を作成し、ランダムな位置に配置する関数
+        function createComplexObjects() {
+            // 図形に使用するマテリアル
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x5a5a7a, // 落ち着いた紫色
+                emissive: 0x111122,
+                specular: 0xffffff,
+                shininess: 30,
+                transparent: true,
+                opacity: 0.6,
+                wireframe: true // ワイヤーフレームでモダンな表現に
+            });
+            
+            // ジオメトリの配列
+            const geometries = [
+                new THREE.BoxGeometry(200, 200, 200), // キューブ
+                new THREE.TorusGeometry(150, 40, 16, 100), // トーラス
+                new THREE.TorusKnotGeometry(100, 30, 100, 16) // トーラスノット
+            ];
+
+            const numObjects = 5; // 追加する図形の数
+            const objectMaxRange = 2000; // 図形の配置範囲
+
+            for (let i = 0; i < numObjects; i++) {
+                const geometry = geometries[i % geometries.length]; // ジオメトリを順番に使用
+                const mesh = new THREE.Mesh(geometry, material.clone());
+                
+                // ランダムな初期位置
+                mesh.position.set(
+                    (Math.random() - 0.5) * objectMaxRange,
+                    (Math.random() - 0.5) * objectMaxRange,
+                    (Math.random() - 0.5) * objectMaxRange
+                );
+                
+                // ランダムな初期回転
+                mesh.rotation.set(
+                    Math.random() * Math.PI * 2,
+                    Math.random() * Math.PI * 2,
+                    Math.random() * Math.PI * 2
+                );
+                
+                scene.add(mesh);
+                complexObjects.push(mesh);
+            }
+        }
+        
+        // ライトを追加 (図形のマテリアルが反映されるようにPhongMaterialを使用するため)
+        function addLights() {
+            // 環境光 (全体をわずかに明るくする)
+            scene.add(new THREE.AmbientLight(0x404040));
+
+            // 点光源 (図形のハイライトを作る)
+            const pointLight = new THREE.PointLight(0xffffff, 1000);
+            pointLight.position.set(1000, 1000, 1000);
+            scene.add(pointLight);
+        }
+
+        // --- 初期化 ---
+        function init() {
+            const container = document.getElementById('container');
+
+            // 1. Scene Setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0d0d1a, 1, 3000); // 霧で遠景をぼかす (距離を伸ばす)
+            addLights(); // ライトの追加
+
+            // 2. Camera Setup (遠近法カメラを使用)
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000);
+            camera.position.z = 1000;
+
+            // 3. Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // 4. Paricles Setup
+            for (let i = 0; i < particleCount; i++) {
+                const position = new THREE.Vector3(
+                    (Math.random() - 0.5) * 1600,
+                    (Math.random() - 0.5) * 1600,
+                    (Math.random() - 0.5) * 1600 // Z方向の範囲も広げる
+                );
+                particles.push(new Particle(position));
+            }
+            
+            // 5. Complex Objects Setup (立体図形の追加)
+            createComplexObjects();
+
+            // 6. Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
+            
+            // フルスクリーン状態変更を監視し、ボタンの表示を更新
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+
+            // 初期レンダリング
+            animate();
+        }
+
+        // フルスクリーン状態変更時の処理
+        function handleFullscreenChange() {
+            const isFullscreen = !!document.fullscreenElement;
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            
+            // ボタンのテキストを更新 (CSSで非表示にするが、テキストも更新しておくと分かりやすい)
+            if (isFullscreen) {
+                fullscreenBtn.textContent = 'フルスクリーンを終了';
+            } else {
+                fullscreenBtn.textContent = 'フルスクリーンにする';
+            }
+            
+            // フルスクリーン解除時にもリサイズ処理を呼び出す
+            onWindowResize();
+        }
+
+
+        // --- アニメーションループ ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            const elapsedTime = clock.getElapsedTime();
+
+            // 1. カメラの自動移動 (よりダイナミックな動き)
+            const range = 500; // 移動範囲の振幅
+
+            // X軸とY軸は緩やかなサインカーブで動きを付ける
+            camera.position.x = Math.sin(elapsedTime * 0.1) * range * 0.5;
+            camera.position.y = Math.cos(elapsedTime * 0.15) * range * 0.5;
+
+            // Z軸は継続的に前進し、一定距離でリセットされる動き
+            const zSpeed = 50; 
+            camera.position.z += zSpeed * delta;
+            
+            // Z軸が一定のしきい値を超えたらリセットしてループさせる
+            if (camera.position.z > 2000) { 
+                camera.position.z = 0;
+            }
+            
+            // シーンの中心 (0, 0, 0) を見つめる
+            camera.lookAt(0, 0, 0); 
+
+            // 2. 立体図形の回転アニメーション
+            complexObjects.forEach((object, index) => {
+                // 図形ごとに異なる速度で回転させる
+                object.rotation.x += 0.001 * (index + 1);
+                object.rotation.y += 0.002 * (index + 1);
+            });
+
+
+            // 3. パーティクルの位置を更新
+            particles.forEach(p => p.update());
+
+            // 4. 既存の接続線を削除
+            scene.children
+                .filter(obj => obj.isLine)
+                .forEach(line => scene.remove(line));
+
+            // 5. 接続線を再生成
+            const linesToDraw = [];
+            for (let i = 0; i < particleCount; i++) {
+                for (let j = i + 1; j < particleCount; j++) {
+                    const p1 = particles[i];
+                    const p2 = particles[j];
+                    const distance = p1.mesh.position.distanceTo(p2.mesh.position);
+
+                    if (distance < connectionDistance) {
+                        // 距離に応じて不透明度を調整
+                        const opacity = 1 - (distance / connectionDistance);
+                        
+                        linesToDraw.push({
+                            p1: p1.mesh.position, 
+                            p2: p2.mesh.position, 
+                            opacity: opacity * 0.2 // 全体の透明度をさらに下げる
+                        });
+                    }
+                }
+            }
+
+            // 6. 実際の線オブジェクトの描画
+            linesToDraw.forEach(data => {
+                const points = [data.p1, data.p2];
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = lineMaterial.clone();
+                material.opacity = data.opacity;
+                
+                const line = new THREE.Line(geometry, material);
+                scene.add(line);
+            });
+
+
+            renderer.render(scene, camera);
+        }
+
+        // --- ウィンドウリサイズ時の処理 ---
+        function onWindowResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+        }
+
+        // --- フルスクリーン切り替え処理 ---
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                // フルスクリーンモードを開始
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`フルスクリーンモードへの切り替えに失敗しました: ${err.message}`);
+                });
+            } else {
+                // フルスクリーンモードを終了
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(err => {
+                        console.error(`フルスクリーンモードの終了に失敗しました: ${err.message}`);
+                    });
+                }
+            }
+        }
+        
+        // アプリケーションの開始
+        window.onload = init;
+
+    </script>
+</body>
+</html>

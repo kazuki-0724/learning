@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Sticky Notes Board</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            font-family: 'Kalam', cursive, sans-serif;
+            cursor: grab;
+        }
+        
+        body:active {
+            cursor: grabbing;
+        }
+
+        /* ------------------------------------- */
+        /* Control UI Layout Adjustment - Modernized */
+        /* ------------------------------------- */
+
+        /* 左上: 主要アクション (色選択, クリア, ヘルプ) */
+        #primary-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* 右上: 検索機能のみ */
+        #search-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px;
+            border-radius: 8px;
+            width: 250px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        /* 右下: カメラ操作とデータ管理 */
+        #utility-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        /* ユーティリティ内のボタンの横並びグループ */
+        .util-group {
+            display: flex;
+            gap: 8px;
+        }
+
+
+        #search-input {
+            padding: 5px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            flex-grow: 1;
+            font-family: sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        
+        #search-input::placeholder {
+            color: #ccc;
+        }
+
+        .control-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        #search-btn {
+            padding: 5px 10px;
+            border-radius: 6px;
+            background-color: rgba(50, 200, 255, 0.8);
+            color: black;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* 座標リセットボタンのスタイル */
+        #reset-position-btn {
+            background-color: rgba(0, 150, 255, 0.6);
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        
+        /* 使い方ボタンのスタイル */
+        #help-btn {
+            background-color: rgba(0, 136, 85, 0.6);
+        }
+        
+        /* テキスト出力ボタンのスタイル */
+        #export-txt-btn {
+            background-color: rgba(255, 165, 0, 0.6); 
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        
+        /* 全メモ削除ボタンのスタイル */
+        #clear-data-btn {
+            background-color: rgba(170, 0, 0, 0.6);
+        }
+
+        .control-btn.zoom-btn {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .control-btn:active {
+            transform: translateY(1px);
+        }
+
+
+        .color-btn {
+            width: 30px; /* サイズを少し小さく */
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border-color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        /* The actual 3D Note Styling (CSS3DObject content) */
+        .note-element {
+            width: 400px;
+            height: 400px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            padding: 15px;
+            box-sizing: border-box;
+            font-size: 20px;
+            line-height: 1.4;
+            cursor: text;
+            user-select: none;
+            transition: box-shadow 0.2s, border 0.2s;
+            display: flex;
+            flex-direction: column;
+            /* Post-it curl effect */
+            border-bottom-right-radius: 60px 5px;
+            border: 3px solid transparent;
+            position: relative; 
+        }
+
+        /* 検索ハイライトスタイル (白色に変更) */
+        .note-element.highlighted {
+            border: 5px solid #ffffff; 
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease-out;
+        }
+
+
+        .note-element:hover {
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+        .note-textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            resize: none;
+            outline: none;
+            font-family: 'Kalam', cursive;
+            font-size: 1.2rem;
+            color: #333;
+        }
+        
+        .note-textarea::placeholder {
+            color: rgba(0,0,0,0.3);
+        }
+        
+        /* 削除ボタンのスタイル */
+        .delete-btn {
+            position: absolute;
+            top: -10px; 
+            right: -10px; 
+            width: 30px;
+            height: 30px;
+            background: #ff3333;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0; 
+            transition: opacity 0.2s, transform 0.1s;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            pointer-events: none; 
+        }
+
+        .note-element:hover .delete-btn {
+            opacity: 1; 
+            transform: scale(1.1);
+            pointer-events: auto; 
+        }
+        
+        .delete-btn:active {
+            transform: scale(0.9);
+        }
+        
+        /* カスタムモーダル (alert()の代替) */
+        #confirmation-modal, #help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none; /* 初期状態では非表示 */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #modal-content, #modal-content-help {
+            background: #2b2b2b;
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            font-family: sans-serif;
+            text-align: center;
+        }
+        
+        #modal-content-help h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #7afcff; /* ヘルプの色 */
+        }
+        
+        #help-list {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        #help-list p {
+            font-size: 1.0rem;
+            line-height: 1.5;
+            color: #ddd;
+            margin: 8px 0;
+        }
+
+
+        #modal-content h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #ff5555;
+        }
+
+        #modal-content p {
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #ddd;
+        }
+
+        #modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        #modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        #confirm-delete-btn {
+            background-color: #ff5555;
+            color: white;
+        }
+
+        #confirm-delete-btn:hover {
+            background-color: #e04444;
+        }
+
+        #cancel-delete-btn {
+            background-color: #555;
+            color: white;
+        }
+
+        #cancel-delete-btn:hover {
+            background-color: #666;
+        }
+
+    </style>
+    <!-- Import Maps for Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    
+    <!-- 全メモ削除 カスタムモーダルUI -->
+    <div id="confirmation-modal">
+        <div id="modal-content">
+            <h3>警告</h3>
+            <p>全てのメモを完全に削除してもよろしいですか？この操作は元に戻せません。</p>
+            <div id="modal-buttons">
+                <button id="confirm-delete-btn">完全に削除</button>
+                <button id="cancel-delete-btn">キャンセル</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ヘルプ/使い方モーダルUI -->
+    <div id="help-modal">
+        <div id="modal-content-help">
+            <h3>使い方ガイド</h3>
+            <div id="help-list">
+                <p>• <strong>空きスペースクリック</strong>: メモを追加</p>
+                <p>• <strong>ドラッグ</strong>: ボードの平行移動 (パン)</p>
+                <p>• <strong>ホイール / ズームボタン</strong>: 拡大縮小 (ズーム)</p>
+                <p>• <strong>メモにマウスオーバー</strong>: 削除ボタンを表示</p>
+                <p>• <strong>座標リセット</strong>: ボードを初期位置に戻す</p>
+                <p>• <strong>全メモ削除</strong>: すべてのデータを削除（要確認）</p>
+                <p>• <strong>テキスト出力</strong>: 全メモの内容をテキストファイルでダウンロード</p>
+                <p>• <strong>検索</strong>: メモの内容をハイライト表示</p>
+            </div>
+            <div id="modal-buttons">
+                <button id="close-help-btn" class="control-btn" style="background-color: #008855; color: white; border: none;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 左上: 主要アクション (色選択, クリア, ヘルプ) -->
+    <div id="primary-controls">
+        <div class="color-btn active" style="background-color: #fff740;" data-color="#fff740"></div> <!-- Yellow -->
+        <div class="color-btn" style="background-color: #ff7eb9;" data-color="#ff7eb9"></div> <!-- Pink -->
+        <div class="color-btn" style="background-color: #7afcff;" data-color="#7afcff"></div> <!-- Blue -->
+        <div class="color-btn" style="background-color: #feff9c;" data-color="#feff9c"></div> <!-- Pale Yellow -->
+        <div class="color-btn" style="background-color: #98ff98;" data-color="#98ff98"></div> <!-- Green -->
+        
+        <button id="help-btn" class="control-btn">使い方</button>
+        <button id="clear-data-btn" class="control-btn" style="background-color: rgba(170, 0, 0, 0.6);">全メモ削除</button>
+    </div>
+
+    <!-- 右上: 検索機能のみ -->
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="メモを検索..." />
+        <button id="search-btn" class="control-btn">🔍</button>
+    </div>
+    
+    <!-- 右下: カメラ操作とデータ管理 -->
+    <div id="utility-controls">
+        <div class="util-group">
+            <button id="zoom-in-btn" class="control-btn zoom-btn">+</button>
+            <button id="zoom-out-btn" class="control-btn zoom-btn">-</button>
+        </div>
+        
+        <div class="util-group" style="margin-top: 5px;">
+            <button id="export-txt-btn" class="control-btn" style="background-color: rgba(255, 165, 0, 0.6);">テキスト出力</button>
+            <button id="reset-position-btn" class="control-btn" style="background-color: rgba(0, 150, 255, 0.6);">リセット</button>
+        </div>
+    </div>
+
+
+    <!-- Container for Three.js -->
+    <div id="container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
+
+        let camera, scene, renderer, cssRenderer;
+        
+        // パン操作用変数
+        let isPanning = false;
+        let panStartX = 0, panStartY = 0;
+        
+        let raycaster;
+        let mouse;
+        let clickPlane; // The invisible plane we click on
+        
+        // State
+        let selectedColor = '#fff740';
+        let isDragging = false; // クリック vs ドラッグ判定用
+        let mouseDownTime = 0;
+        const notes = []; // THREE.CSS3DObjectの配列
+        
+        // IndexedDB Constants
+        const DB_NAME = 'StickyNotesDB';
+        const STORE_NAME = 'notes';
+        const DB_VERSION = 1;
+        
+        // カメラの初期設定
+        const INITIAL_CAMERA_ZOOM = 1;
+        
+        // カメラ初期化関数 (リサイズイベントでも利用)
+        function setupCamera() {
+            const aspectRatio = window.innerWidth / window.innerHeight;
+            const size = 1000;
+            
+            camera = new THREE.OrthographicCamera(
+                size * aspectRatio / - 2, 
+                size * aspectRatio / 2, 
+                size / 2, 
+                size / - 2, 
+                1, 
+                2000
+            );
+            
+            // 初期位置とズーム
+            camera.position.set(0, 0, 1000);
+            camera.zoom = INITIAL_CAMERA_ZOOM;
+            camera.updateProjectionMatrix();
+        }
+
+
+        init();
+        animate();
+
+        // --- IndexedDB Functions (変更なし) ---
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+                request.onsuccess = (event) => {
+                    resolve(event.target.result);
+                };
+                request.onerror = (event) => {
+                    console.error("IndexedDB error:", event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+
+        async function saveNoteToDB(noteData) {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.put(noteData);
+            } catch (error) {
+                console.error("Failed to save note:", error);
+            }
+        }
+
+        async function deleteNoteFromDB(id) {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.delete(id);
+            } catch (error) {
+                console.error("Failed to delete note:", error);
+            }
+        }
+        
+        async function clearAllNotesFromDB() {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.clear();
+                return true;
+            } catch (error) {
+                console.error("Failed to clear all notes:", error);
+                return false;
+            }
+        }
+
+        async function loadNotesFromDB() {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.getAll();
+
+                return new Promise((resolve, reject) => {
+                    request.onsuccess = () => {
+                        resolve(request.result);
+                    };
+                    request.onerror = (event) => {
+                        reject(event.target.error);
+                    };
+                });
+
+            } catch (error) {
+                console.error("Failed to load notes:", error);
+                return [];
+            }
+        }
+        // --- End IndexedDB Functions ---
+
+
+        async function init() {
+            const container = document.getElementById('container');
+
+            // 1. Scene Setup
+            scene = new THREE.Scene();
+
+            // 2. Camera Setup
+            setupCamera();
+
+            // 3. WebGL Renderer (for visual helpers, grid, etc)
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.domElement.style.position = 'absolute';
+            renderer.domElement.style.top = 0;
+            renderer.domElement.style.zIndex = 1; 
+            renderer.domElement.style.pointerEvents = 'none'; 
+            container.appendChild(renderer.domElement);
+
+            // 4. CSS3D Renderer (for HTML elements)
+            cssRenderer = new CSS3DRenderer();
+            cssRenderer.setSize(window.innerWidth, window.innerHeight);
+            cssRenderer.domElement.style.position = 'absolute';
+            cssRenderer.domElement.style.top = 0;
+            cssRenderer.domElement.style.zIndex = 2; 
+            container.appendChild(cssRenderer.domElement);
+
+            // 5. Invisible Click Plane & Grid
+            const planeGeometry = new THREE.PlaneGeometry(4000, 4000);
+            const planeMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x000000, 
+                opacity: 0, 
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            clickPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+            scene.add(clickPlane);
+
+            // Visual Grid Helper 
+            const gridHelper = new THREE.GridHelper(4000, 40, 0x444444, 0x222222);
+            gridHelper.rotation.x = Math.PI / 2;
+            scene.add(gridHelper);
+
+            // 6. Raycaster setup
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            // 7. Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('wheel', onMouseWheel, { passive: false }); // ズーム
+            
+            // カスタムパン操作ロジック
+            const interactionElement = cssRenderer.domElement;
+            
+            interactionElement.addEventListener('mousedown', onMouseDown);
+            interactionElement.addEventListener('mousemove', onMouseMove);
+            interactionElement.addEventListener('mouseup', onMouseUp);
+            interactionElement.addEventListener('mouseleave', onMouseUp); 
+            
+            // 8. UI Controls & Load Notes
+            setupUIControls();
+            
+            const savedNotes = await loadNotesFromDB();
+            if (savedNotes.length > 0) {
+                savedNotes.forEach(data => {
+                    createNote(data.position.x, data.position.y, data.position.z, data.color, data.text, data.rotationZ, data.id);
+                });
+            } else {
+                // Add initial notes if none are saved
+                createNote(0, 200, 0, '#fff740', "Welcome!\nHere is your 2D board workspace.", 0.05);
+                createNote(-300, 0, 0, '#ff7eb9', "ボードをドラッグして移動できます。", -0.05);
+                createNote(300, -100, 0, '#7afcff', "検索機能でメモをハイライトできます。右上の入力欄を使ってください。", 0.1);
+            }
+        }
+        
+        // --- カメラ操作関数 ---
+        function resetCameraPosition() {
+            camera.position.set(0, 0, 1000);
+            camera.zoom = INITIAL_CAMERA_ZOOM;
+            camera.updateProjectionMatrix();
+        }
+
+        function onMouseDown(event) {
+            // モーダルが表示されている場合は、ボード操作を無効にする
+            if (document.getElementById('confirmation-modal').style.display === 'flex' || 
+                document.getElementById('help-modal').style.display === 'flex') {
+                return;
+            }
+
+            // UI要素上でのクリックではパンを開始しない
+            const targetElement = event.target.closest('.note-element, .control-btn, #primary-controls, #utility-controls, #search-container');
+            if (targetElement) return;
+
+            isPanning = true;
+            panStartX = event.clientX;
+            panStartY = event.clientY;
+            isDragging = false;
+            mouseDownTime = Date.now();
+            document.body.style.cursor = 'grabbing';
+        }
+
+        function onMouseMove(event) {
+            if (Date.now() - mouseDownTime > 50 || Math.abs(event.clientX - panStartX) > 5 || Math.abs(event.clientY - panStartY) > 5) {
+                isDragging = true;
+            }
+
+            if (isPanning) {
+                const deltaX = event.clientX - panStartX;
+                const deltaY = event.clientY - panStartY;
+
+                const cameraWidth = camera.right - camera.left;
+                const cameraHeight = camera.top - camera.bottom;
+                
+                const moveFactorX = cameraWidth / window.innerWidth / camera.zoom;
+                const moveFactorY = cameraHeight / window.innerHeight / camera.zoom;
+
+                camera.position.x -= deltaX * moveFactorX;
+                camera.position.y += deltaY * moveFactorY;
+                
+                camera.updateProjectionMatrix();
+
+                panStartX = event.clientX;
+                panStartY = event.clientY;
+            }
+        }
+
+        function onMouseUp(event) {
+            document.body.style.cursor = 'grab';
+            
+            if (isPanning && !isDragging) {
+                onMouseClick(event);
+            }
+
+            isPanning = false;
+            isDragging = false;
+        }
+
+        // --- ズーム操作関数 ---
+        function onMouseWheel(event) {
+            // モーダルが表示されている場合は、ボード操作を無効にする
+            if (document.getElementById('confirmation-modal').style.display === 'flex' || 
+                document.getElementById('help-modal').style.display === 'flex') {
+                return;
+            }
+            
+            event.preventDefault(); 
+            zoomCamera(event.deltaY > 0 ? 1.1 : 0.9);
+        }
+
+        function zoomCamera(scaleFactor) {
+            const currentZoom = camera.zoom;
+            let newZoom = currentZoom / scaleFactor;
+            
+            // ズーム制限 (最小0.1、最大5)
+            newZoom = Math.max(0.1, Math.min(5, newZoom));
+            
+            if (newZoom !== currentZoom) {
+                camera.zoom = newZoom;
+                camera.updateProjectionMatrix();
+            }
+        }
+        
+        // --- 検索機能 ---
+        function searchNotes() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            
+            // 全てのメモのハイライトをリセット
+            notes.forEach(object => {
+                object.element.classList.remove('highlighted');
+            });
+
+            if (query === '') return;
+
+            // 検索とハイライト
+            notes.forEach(object => {
+                const textarea = object.element.querySelector('.note-textarea');
+                const text = textarea ? textarea.value.toLowerCase() : '';
+                
+                if (text.includes(query)) {
+                    object.element.classList.add('highlighted');
+                }
+            });
+        }
+
+
+        // --- UI & Modal Controls ---
+        function setupUIControls() {
+            // --- 左上: primary-controls ---
+            const colorBtns = document.querySelectorAll('.color-btn');
+            colorBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    colorBtns.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    selectedColor = e.target.dataset.color;
+                    e.stopPropagation();
+                });
+            });
+            
+            // ヘルプボタン (使い方) のイベント
+            const helpBtn = document.getElementById('help-btn');
+            const helpModal = document.getElementById('help-modal');
+            const closeHelpBtn = document.getElementById('close-help-btn');
+            
+            helpBtn.addEventListener('click', (e) => {
+                helpModal.style.display = 'flex';
+                e.stopPropagation();
+            });
+
+            closeHelpBtn.addEventListener('click', () => {
+                helpModal.style.display = 'none';
+            });
+            
+            // 全メモ削除ボタン (カスタムモーダル表示)
+            document.getElementById('clear-data-btn').addEventListener('click', (e) => {
+                document.getElementById('confirmation-modal').style.display = 'flex';
+                e.stopPropagation();
+            });
+            
+            // --- 右上: search-container ---
+            document.getElementById('search-btn').addEventListener('click', (e) => {
+                searchNotes();
+                e.stopPropagation();
+            });
+            
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                if (e.target.value.trim() === '') {
+                    // 入力が空になったらハイライトをリセット
+                    notes.forEach(object => object.element.classList.remove('highlighted'));
+                }
+            });
+            
+            document.getElementById('search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchNotes();
+                    e.stopPropagation();
+                }
+            });
+
+            // --- 右下: utility-controls ---
+            // 座標リセットボタン
+            document.getElementById('reset-position-btn').addEventListener('click', (e) => {
+                resetCameraPosition();
+                e.stopPropagation();
+            });
+            
+            // テキスト出力ボタン
+            document.getElementById('export-txt-btn').addEventListener('click', (e) => {
+                exportNotesAsTxt();
+                e.stopPropagation();
+            });
+            
+            // ズームボタンのイベント設定
+            const zoomInBtn = document.getElementById('zoom-in-btn');
+            const zoomOutBtn = document.getElementById('zoom-out-btn');
+            
+            zoomInBtn.addEventListener('click', (e) => {
+                zoomCamera(0.8); 
+                e.stopPropagation();
+            });
+            zoomOutBtn.addEventListener('click', (e) => {
+                zoomCamera(1.25); 
+                e.stopPropagation();
+            });
+
+
+            // --- モーダル共通処理 ---
+            // モーダル: 削除実行ボタン
+            document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+                const success = await clearAllNotes();
+                if (success) {
+                    document.getElementById('confirmation-modal').style.display = 'none';
+                    resetCameraPosition();
+                }
+            });
+
+            // モーダル: キャンセルボタン
+            document.getElementById('cancel-delete-btn').addEventListener('click', () => {
+                document.getElementById('confirmation-modal').style.display = 'none';
+            });
+        }
+        
+        // --- テキスト出力関数 (座標・色情報削除) ---
+        function exportNotesAsTxt() {
+            if (notes.length === 0) {
+                console.log("No notes to export.");
+                return;
+            }
+
+            const exportedText = notes.map((object, index) => {
+                const data = getNoteData(object);
+                
+                // 整形された出力文字列 (内容のみ)
+                return `--- MEMO ${index + 1} ---\n` + 
+                       `${data.text.trim()}\n` +
+                       `--------------------------\n`;
+            }).join('\n'); // すべてのメモを2行の改行で結合
+
+            // Blobを作成し、ダウンロードリンクをシミュレート
+            const blob = new Blob([exportedText], { type: 'text/plain;charset=utf-8' });
+            const today = new Date().toISOString().slice(0, 10);
+            const fileName = `sticky_notes_export_${today}.txt`;
+            
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            
+            // ダウンロードを実行
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            console.log(`Exported ${notes.length} notes to ${fileName}`);
+        }
+        
+        async function clearAllNotes() {
+            const success = await clearAllNotesFromDB();
+            if (success) {
+                notes.forEach(noteObject => {
+                    scene.remove(noteObject);
+                    if (noteObject.element && noteObject.element.parentNode) {
+                        noteObject.element.parentNode.removeChild(noteObject.element);
+                    }
+                });
+                notes.length = 0; 
+                console.log("All notes cleared from scene and IndexedDB.");
+                return true;
+            }
+            return false;
+        }
+
+
+        function onMouseClick(event) {
+            // モーダルが表示されている場合は、メモ追加を無効にする
+            if (document.getElementById('confirmation-modal').style.display === 'flex' || 
+                document.getElementById('help-modal').style.display === 'flex') {
+                return;
+            }
+            
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObject(clickPlane);
+
+            if (intersects.length > 0) {
+                const point = intersects[0].point;
+                const rotationZ = (Math.random() - 0.5) * 0.1; 
+                createNote(point.x, point.y, 0, selectedColor, '', rotationZ);
+            }
+        }
+
+        function createNote(x, y, z, color, initialText = '', rotationZ = 0, id = null) {
+            const noteId = id || crypto.randomUUID();
+
+            const div = document.createElement('div');
+            div.className = 'note-element';
+            div.style.backgroundColor = color;
+            div.dataset.noteId = noteId; 
+
+            const textarea = document.createElement('textarea');
+            textarea.className = 'note-textarea';
+            textarea.placeholder = "Type here...";
+            textarea.value = initialText;
+            
+            // テキストエリア上での操作はボード移動を防ぐ
+            textarea.addEventListener('mousedown', (e) => {
+                e.stopPropagation(); 
+                isPanning = false; 
+            });
+            textarea.addEventListener('touchstart', (e) => e.stopPropagation());
+
+            // Save data on change
+            const debouncedSave = debounce(() => {
+                saveNoteToDB(getNoteData(object));
+            }, 500); // 500msのディレイで保存
+
+            textarea.addEventListener('input', debouncedSave);
+            textarea.addEventListener('blur', debouncedSave);
+
+            // 削除ボタンの追加
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '×';
+            deleteBtn.className = 'delete-btn';
+
+            deleteBtn.addEventListener('mousedown', function(e) {
+                e.stopPropagation(); 
+                isPanning = false; 
+            });
+
+            // メモごとの削除ボタン (確認なしで即座に削除)
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); 
+                deleteNote(object, noteId);
+            });
+
+
+            div.appendChild(textarea);
+            div.appendChild(deleteBtn); 
+
+            const object = new CSS3DObject(div);
+            object.position.set(x, y, z);
+            object.rotation.z = rotationZ;
+            
+            object.position.z = 0; 
+
+            object.userData = { 
+                id: noteId,
+                color: color,
+                rotationZ: rotationZ
+            };
+
+            scene.add(object);
+            notes.push(object);
+            
+            if (!id) {
+                 saveNoteToDB(getNoteData(object));
+            }
+            
+            return object;
+        }
+        
+        // 入力時のDB書き込み頻度を減らすためのデバウンス関数
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+        
+        function getNoteData(object) {
+            const textarea = object.element.querySelector('.note-textarea');
+            return {
+                id: object.userData.id,
+                text: textarea ? textarea.value : '',
+                color: object.userData.color,
+                rotationZ: object.userData.rotationZ,
+                position: { 
+                    x: object.position.x, 
+                    y: object.position.y, 
+                    z: object.position.z 
+                }
+            };
+        }
+
+
+        function deleteNote(object, id) {
+            scene.remove(object);
+            
+            if (object.element && object.element.parentNode) {
+                object.element.parentNode.removeChild(object.element);
+            }
+
+            const index = notes.indexOf(object);
+            if (index > -1) {
+                notes.splice(index, 1);
+            }
+            
+            deleteNoteFromDB(id);
+        }
+
+        function onWindowResize() {
+            // カメラを再セットアップ
+            setupCamera(); 
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            cssRenderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            cssRenderer.render(scene, camera);
+        }
+
+    </script>
+</body>
+</html>

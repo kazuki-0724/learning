@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS2 Style Atmosphere with Neural Link</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: "Times New Roman", serif; /* Classic serif for PS2 vibes */
+            user-select: none;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* CRT Overlay Effect */
+        #scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        /* UI Overlay */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+            color: rgba(255, 255, 255, 0.8);
+            pointer-events: auto; /* Changed to auto to allow input interaction */
+            transition: opacity 0.5s ease;
+        }
+
+        .clock {
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(0, 100, 255, 0.8);
+            letter-spacing: 2px;
+            pointer-events: none;
+        }
+
+        .date {
+            font-size: 1.2rem;
+            margin-top: 5px;
+            color: rgba(200, 200, 255, 0.6);
+            pointer-events: none;
+        }
+
+        /* Menu Styles */
+        .menu-container {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            pointer-events: none; /* Container is pass-through */
+        }
+
+        .menu {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            text-align: center;
+            pointer-events: auto; /* Items are clickable */
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+
+        .menu.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .menu-item {
+            font-size: 1.5rem;
+            margin: 10px 0;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            background: linear-gradient(90deg, transparent, rgba(0, 50, 150, 0.3), transparent);
+            padding: 10px 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .menu-item:hover {
+            background: linear-gradient(90deg, transparent, rgba(0, 100, 255, 0.5), transparent);
+        }
+
+        #start-prompt {
+            position: absolute;
+            bottom: 15%;
+            width: 100%;
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            animation: pulse 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+
+        /* Neural Link UI */
+        #neural-interface {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .input-group {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            color: #fff;
+            padding: 10px;
+            font-family: "Times New Roman", serif;
+            font-size: 1.2rem;
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 50, 255, 0.2);
+        }
+
+        button.gemini-btn {
+            background: linear-gradient(180deg, #004080, #002040);
+            border: 1px solid rgba(100, 200, 255, 0.6);
+            color: white;
+            padding: 10px 20px;
+            font-family: "Times New Roman", serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+
+        button.gemini-btn:hover {
+            background: linear-gradient(180deg, #0060b0, #003060);
+            box-shadow: 0 0 15px rgba(0, 100, 255, 0.6);
+        }
+
+        button.gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #gemini-response {
+            width: 100%;
+            min-height: 100px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: rgba(200, 220, 255, 0.9);
+            text-shadow: 0 0 8px rgba(0, 100, 255, 0.6);
+            display: none; /* Hidden by default */
+        }
+        
+        .back-btn {
+            margin-top: 20px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: "Times New Roman", serif;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .back-btn:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        /* Grain Effect */
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 12;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    
+    <!-- Visual Effects Overlays -->
+    <div id="scanlines"></div>
+    <div id="vignette"></div>
+    <div class="noise"></div>
+
+    <!-- UI Elements -->
+    <div id="ui-layer">
+        <div>
+            <div class="clock" id="clock">00:00</div>
+            <div class="date" id="date">2000/01/01</div>
+        </div>
+        
+        <div id="start-prompt">Press Any Key</div>
+
+        <div class="menu-container">
+            <!-- Main Menu -->
+            <div class="menu" id="menu">
+                <div class="menu-item" onclick="alert('Browser not available.')">Browser</div>
+                <div class="menu-item" onclick="openNeuralLink()">✨ Neural Link</div>
+                <div class="menu-item" onclick="alert('System Configuration locked.')">System Configuration</div>
+            </div>
+
+            <!-- Neural Link Interface (Gemini) -->
+            <div class="menu" id="neural-interface">
+                <div style="margin-bottom: 15px; font-style: italic; color: #aaa;">Establish Connection with Core...</div>
+                <div class="input-group">
+                    <input type="text" id="user-input" placeholder="Query the System..." onkeydown="if(event.key === 'Enter') callGemini()">
+                    <button class="gemini-btn" id="send-btn" onclick="callGemini()">✨ Send</button>
+                </div>
+                <div id="gemini-response"></div>
+                <button class="back-btn" onclick="closeNeuralLink()">Return to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 0. API Configuration ---
+        const apiKey = ""; // System will provide API key at runtime
+
+        // --- 1. Three.js Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        const fogColor = 0x00020a;
+        scene.fog = new THREE.FogExp2(fogColor, 0.015);
+        scene.background = new THREE.Color(fogColor);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // --- 2. Objects (The "Towers") ---
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const towers = [];
+        const towerGroup = new THREE.Group();
+        scene.add(towerGroup);
+
+        const createMaterial = () => {
+            return new THREE.MeshPhongMaterial({
+                color: 0x2040ff,       
+                emissive: 0x050520,    
+                specular: 0xffffff,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.6,
+                flatShading: false
+            });
+        };
+
+        const material = createMaterial();
+
+        const towerCount = 60;
+        const spread = 40;
+
+        for (let i = 0; i < towerCount; i++) {
+            const mesh = new THREE.Mesh(geometry, material);
+            const x = (Math.random() - 0.5) * spread;
+            const z = (Math.random() - 0.5) * spread;
+            const y = (Math.random() - 0.5) * 10; 
+            
+            mesh.position.set(x, y, z);
+
+            const height = 1 + Math.random() * 8; 
+            const width = 0.5 + Math.random() * 1.5;
+            mesh.scale.set(width, height, width);
+
+            mesh.rotation.x = Math.random() * 0.2;
+            mesh.rotation.z = Math.random() * 0.2;
+            mesh.rotation.y = Math.random() * Math.PI;
+
+            mesh.userData = {
+                floatSpeed: 0.005 + Math.random() * 0.01,
+                floatOffset: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.002,
+                originalY: y
+            };
+
+            towers.push(mesh);
+            towerGroup.add(mesh);
+        }
+
+        // --- 3. Particles ---
+        const particleCount = 400;
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i++) {
+            particlePositions[i] = (Math.random() - 0.5) * 60;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            color: 0x00d0ff,
+            size: 0.15,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particleSystem);
+
+        // --- 4. Lighting ---
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        const light1 = new THREE.PointLight(0x0088ff, 2, 50);
+        const light2 = new THREE.PointLight(0xff0088, 1, 50);
+        scene.add(light1);
+        scene.add(light2);
+
+        // --- 5. Animation Logic ---
+        camera.position.z = 20;
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        
+        // State for "Thinking" mode (Gemini processing)
+        let isProcessing = false;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - window.innerWidth / 2) * 0.01;
+            mouseY = (event.clientY - window.innerHeight / 2) * 0.01;
+        });
+
+        document.addEventListener('touchmove', (event) => {
+            if(event.touches.length > 0) {
+                mouseX = (event.touches[0].clientX - window.innerWidth / 2) * 0.01;
+                mouseY = (event.touches[0].clientY - window.innerHeight / 2) * 0.01;
+            }
+        });
+
+        const clockThree = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = clockThree.getElapsedTime();
+
+            // Global speed multiplier based on processing state
+            const speedMult = isProcessing ? 5.0 : 1.0;
+
+            // 1. Move Towers
+            towers.forEach(tower => {
+                tower.position.y += Math.sin(time * speedMult + tower.userData.floatOffset) * 0.005 * speedMult;
+                tower.rotation.y += tower.userData.rotationSpeed * speedMult;
+            });
+
+            // 2. Move Lights
+            light1.position.x = Math.sin(time * 0.3 * speedMult) * 15;
+            light1.position.z = Math.cos(time * 0.3 * speedMult) * 15;
+            light1.position.y = Math.sin(time * 0.5 * speedMult) * 5;
+
+            light2.position.x = Math.sin(time * 0.2 * speedMult + 2) * 20;
+            light2.position.z = Math.cos(time * 0.2 * speedMult + 2) * 20;
+            light2.position.y = Math.cos(time * 0.3 * speedMult) * 8;
+
+            // Visual Feedback for AI processing: Change lights to "Alert" Red
+            if (isProcessing) {
+                light1.color.setHex(0xff0000); // Red
+                light2.color.setHex(0xffaa00); // Orange
+                material.color.setHex(0x550000); // Dark Red Towers
+                material.emissive.setHex(0x220000);
+            } else {
+                // Revert to Blue/Purple
+                light1.color.setHex(0x0088ff);
+                light2.color.setHex(0xff0088);
+                material.color.setHex(0x2040ff);
+                material.emissive.setHex(0x050520);
+            }
+
+            // 3. Camera
+            targetX = targetX + (mouseX - targetX) * 0.05;
+            targetY = targetY + (mouseY - targetY) * 0.05;
+
+            const camRadius = 25;
+            const camSpeed = 0.1;
+            camera.position.x = Math.sin(time * camSpeed) * camRadius + targetX;
+            camera.position.z = Math.cos(time * camSpeed) * camRadius;
+            camera.position.y = Math.sin(time * 0.05) * 5 + targetY;
+
+            camera.lookAt(0, 0, 0);
+
+            // 4. Particle Rotation
+            particleSystem.rotation.y = time * 0.05 * speedMult;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+
+        // --- 6. UI & Clock Logic ---
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+
+            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+            document.getElementById('date').textContent = `${year}/${month}/${day}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+
+        // --- 7. Menu Navigation ---
+        let isActive = false;
+        const menu = document.getElementById('menu');
+        const startPrompt = document.getElementById('start-prompt');
+        const neuralInterface = document.getElementById('neural-interface');
+
+        function activateMenu() {
+            if (isActive) return;
+            // Only activate if we are NOT in neural interface mode
+            if (neuralInterface.style.display === 'flex') return;
+
+            isActive = true;
+            startPrompt.style.display = 'none';
+            menu.classList.add('active');
+            
+            // Flash effect
+            const flash = document.createElement('div');
+            flash.style.position = 'fixed';
+            flash.style.top = '0';
+            flash.style.left = '0';
+            flash.style.width = '100%';
+            flash.style.height = '100%';
+            flash.style.backgroundColor = 'white';
+            flash.style.opacity = '0.2';
+            flash.style.zIndex = '100';
+            flash.style.transition = 'opacity 0.5s';
+            document.body.appendChild(flash);
+            
+            setTimeout(() => {
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 500);
+            }, 50);
+        }
+
+        // Only trigger menu on interaction if it's not open
+        window.addEventListener('keydown', (e) => {
+            if(!isActive && neuralInterface.style.display !== 'flex') activateMenu();
+        });
+        window.addEventListener('click', (e) => {
+             // Don't trigger if clicking on UI elements
+             if (e.target.closest('.menu') || e.target.closest('input') || e.target.closest('button')) return;
+             if(!isActive && neuralInterface.style.display !== 'flex') activateMenu();
+        });
+
+
+        // --- 8. Gemini Feature Logic ---
+
+        function openNeuralLink() {
+            menu.classList.remove('active'); // Hide main menu
+            setTimeout(() => {
+                menu.style.display = 'none';
+                neuralInterface.style.display = 'flex';
+                setTimeout(() => {
+                    neuralInterface.classList.add('active');
+                    document.getElementById('user-input').focus();
+                }, 50);
+            }, 500);
+        }
+
+        function closeNeuralLink() {
+            neuralInterface.classList.remove('active');
+            setTimeout(() => {
+                neuralInterface.style.display = 'none';
+                menu.style.display = 'block';
+                setTimeout(() => menu.classList.add('active'), 50);
+            }, 500);
+            
+            // Reset output
+            document.getElementById('gemini-response').style.display = 'none';
+            document.getElementById('gemini-response').innerText = "";
+            document.getElementById('user-input').value = "";
+        }
+
+        async function callGemini() {
+            const inputField = document.getElementById('user-input');
+            const prompt = inputField.value.trim();
+            const responseDiv = document.getElementById('gemini-response');
+            const btn = document.getElementById('send-btn');
+
+            if (!prompt) return;
+
+            // UI State: Processing
+            isProcessing = true; // Changes Three.js animation speed/color
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+            responseDiv.style.display = 'block';
+            responseDiv.innerText = "Accessing Neural Core...";
+
+            try {
+                // Prepare the system prompt for the persona
+                const systemPrompt = "You are the sentient AI of a PlayStation 2 style BIOS screensaver. You exist in a dark, foggy void of memory towers. Your personality is calm, mysterious, and slightly nostalgic. You speak in Japanese. Keep responses short (max 2 sentences), poetic, and atmospheric. Use metaphors related to data, crystals, memory, and silence.";
+
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                        }),
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Memory corruption detected. No data found.";
+
+                // Typewriter effect for text
+                typeWriterEffect(responseDiv, generatedText);
+
+            } catch (error) {
+                console.error("Gemini Error:", error);
+                responseDiv.innerText = "Connection lost. The void is silent.";
+            } finally {
+                // UI State: Done
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerText = "✨ Send";
+                inputField.value = "";
+            }
+        }
+
+        function typeWriterEffect(element, text) {
+            element.innerText = "";
+            let i = 0;
+            const speed = 50; // ms per char
+
+            function type() {
+                if (i < text.length) {
+                    element.innerText += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // --- 9. Resize Handler ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>

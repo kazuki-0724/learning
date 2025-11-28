@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D 幾何学アニメーション・スクリーンセーバー</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050510; /* より暗い背景 */
+            font-family: sans-serif;
+            color: white;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #screenSaverCanvas {
+            display: block;
+            background-color: #050510;
+        }
+
+        /* フルスクリーンコントロール */
+        #controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: opacity 0.3s;
+        }
+
+        /* フルスクリーン中はコントロールを非表示にする */
+        :fullscreen #controls {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            background-color: rgba(255, 60, 180, 0.7); /* マゼンタ系のモダンな色に変更 */
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .control-btn:hover {
+            background-color: rgba(255, 60, 180, 0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- 2D Canvas コンテナ -->
+    <div id="canvas-container">
+        <canvas id="screenSaverCanvas"></canvas>
+    </div>
+
+    <!-- コントロールUI -->
+    <div id="controls">
+        <button id="fullscreen-btn" class="control-btn">フルスクリーンにする</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('screenSaverCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let lastTime = 0;
+        let shapes = [];
+        const SHAPE_COUNT = 50;
+        // 描画範囲を画面サイズよりも広げるための係数 (1.5 = 150%)
+        const DRAW_RANGE_FACTOR = 1.5; 
+
+        /**
+         * 図形オブジェクトのクラス
+         */
+        class AnimatedShape {
+            constructor(index) {
+                this.index = index;
+                // 初期位置を画面外も含めた広い範囲でランダムに決定
+                this.x = (Math.random() - 0.5) * width * DRAW_RANGE_FACTOR;
+                this.y = (Math.random() - 0.5) * height * DRAW_RANGE_FACTOR;
+                this.radius = 10 + Math.random() * 40;
+                // アニメーションの速度を抑えるため、ランダム幅を小さくする
+                this.speed = 0.0005 + Math.random() * 0.001; 
+                this.colorStart = Math.random() * 360; // 初期の色相
+                this.type = Math.floor(Math.random() * 3); // 0:Circle, 1:Square, 2:Line
+            }
+
+            update(time) {
+                // 時間に基づいて位置、サイズ、色をアニメーション
+                const t = time * this.speed + this.index * 0.5;
+                
+                // 画面サイズに基づいた動きの振幅を計算
+                const amplitudeX = width * DRAW_RANGE_FACTOR / 2;
+                const amplitudeY = height * DRAW_RANGE_FACTOR / 2;
+
+                // 複雑な位置アニメーション: 複数のサイン波を組み合わせる
+                // 動きの周期も長くするため、係数を全体的に小さくする (例: 0.8 -> 0.4, 0.6 -> 0.3)
+                this.x = (width / 2) + Math.sin(t * 0.4) * amplitudeX * Math.cos(t * 0.2);
+                this.y = (height / 2) + Math.cos(t * 0.3) * amplitudeY * Math.sin(t * 0.15);
+
+                // サイズアニメーション (変動幅を少し抑える)
+                this.sizeScale = 1 + Math.sin(t * 0.75) * 0.2; // 1.5 -> 0.75, 0.3 -> 0.2
+
+                // 色アニメーション (色相環を循環。速度を抑える)
+                this.hue = (this.colorStart + t * 10) % 360; // 20 -> 10
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                const size = this.radius * this.sizeScale;
+                const color = `hsla(${this.hue}, 80%, 60%, 0.7)`;
+                
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = 2;
+
+                // 図形の描画ロジック
+                switch(this.type) {
+                    case 0: // Circle (円)
+                        ctx.beginPath();
+                        ctx.arc(0, 0, size, 0, Math.PI * 2);
+                        ctx.stroke();
+                        break;
+                    case 1: // Square (正方形)
+                        ctx.rotate(this.hue * Math.PI / 3600); // 緩やかな回転 (1800 -> 3600)
+                        ctx.strokeRect(-size, -size, size * 2, size * 2);
+                        break;
+                    case 2: // Line (線分) - スピログラフ風
+                        ctx.rotate(this.hue * Math.PI / 7200); // 緩やかな回転 (3600 -> 7200)
+                        ctx.beginPath();
+                        const len = size * 1.5;
+                        const angle = Math.sin(this.hue / 200) * Math.PI; // 動きを緩やかに (100 -> 200)
+                        ctx.moveTo(Math.cos(angle) * len, Math.sin(angle) * len);
+                        ctx.lineTo(Math.cos(angle + Math.PI) * len, Math.sin(angle + Math.PI) * len);
+                        ctx.stroke();
+                        break;
+                }
+                
+                ctx.restore();
+            }
+        }
+
+        /**
+         * キャンバスサイズをウィンドウに合わせて設定
+         */
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        /**
+         * アニメーションループ
+         */
+        function animate(time) {
+            requestAnimationFrame(animate);
+
+            const deltaTime = time - lastTime;
+            lastTime = time;
+
+            // 描画をクリアし、残像効果のために薄い半透明の背景で上書き
+            // 不透明度を0.08に変更し、残像を強め、ちらつきを抑える
+            ctx.fillStyle = 'rgba(5, 5, 16, 0.08)'; 
+            ctx.fillRect(0, 0, width, height);
+            
+            // 図形の更新と描画
+            shapes.forEach(shape => {
+                shape.update(time);
+                shape.draw(ctx);
+            });
+        }
+        
+        /**
+         * 初期化処理
+         */
+        function init() {
+            resizeCanvas(); // 初回リサイズ
+            window.addEventListener('resize', resizeCanvas); // リサイズイベントリスナー
+            
+            // 図形オブジェクトの初期生成
+            for (let i = 0; i < SHAPE_COUNT; i++) {
+                shapes.push(new AnimatedShape(i));
+            }
+
+            // フルスクリーンボタンのイベントリスナー
+            document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
+
+            // アニメーション開始
+            animate(0);
+        }
+
+        /**
+         * フルスクリーン切り替え処理
+         */
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`フルスクリーンモードへの切り替えに失敗しました: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(err => {
+                        console.error(`フルスクリーンモードの終了に失敗しました: ${err.message}`);
+                    });
+                }
+            }
+        }
+        
+        // アプリケーションの開始
+        window.onload = init;
+    </script>
+</body>
+</html>
