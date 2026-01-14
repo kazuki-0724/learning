@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "NotebookLM Folder Manager",
+  "version": "1.0",
+  "description": "NotebookLMのノートブックをフォルダで管理します",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://notebooklm.google.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://notebooklm.google.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
