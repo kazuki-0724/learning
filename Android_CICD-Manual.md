@@ -1,12 +1,32 @@
 # AndroidのCI/CD導入資料
 
 ```
-・目次を入れる
 ・適宜画像での説明を追加
 ・構成を見直す
 ・導入にあたっての部分を加筆
-
 ```
+
+- [AndroidのCI/CD導入資料](#androidのcicd導入資料)
+  - [はじめに](#はじめに)
+  - [本資料のゴール](#本資料のゴール)
+  - [必要知識](#必要知識)
+  - [前提](#前提)
+  - [導入後のアプリ配信までのフロー](#導入後のアプリ配信までのフロー)
+  - [CI/CDの概要](#cicdの概要)
+    - [導入にあたっての準備](#導入にあたっての準備)
+      - [ビルドバリアントの確認](#ビルドバリアントの確認)
+      - [CI/CD変数の設定](#cicd変数の設定)
+  - [CI/CDスクリプトの構成](#cicdスクリプトの構成)
+      - [ジョブ定義に関する説明](#ジョブ定義に関する説明)
+      - [ステージの定義](#ステージの定義)
+      - [Dockerイメージの定義](#dockerイメージの定義)
+      - [静的解析 (Lint)](#静的解析-lint)
+      - [ユニットテスト (Unit Test)](#ユニットテスト-unit-test)
+      - [ビルド](#ビルド)
+      - [デプロイ](#デプロイ)
+      - [具体例](#具体例)
+
+
 
 
 
@@ -45,6 +65,29 @@ GitLab上でパイプラインを実行することで、Androidのアプリケ�
 CI/CDは
 本資料においてCIについては「静的解析」「テスト」「ビルド」を対象とし、CDについては「デプロイ」を対象とする。
 
+### 導入にあたっての準備
+
+#### ビルドバリアントの確認
+モジュールレベルの`build.gradle`を参照し、必要なビルドタイプでCI/CDスクリプトを定義する。
+以下はAndroidプロジェクトのデフォルト状態の場合に定義されているビルドタイプ。「debug」は明示的に定義せずに利用できる（特別な設定を行いたい場合は別途定義する）。
+ビルドタイプはgradleを合わせて利用し、ビルドタイプが「debug」でapkを作成したい場合は「assembleDebug」、aabファイルを作成したい場合は「bundleDebug」など。
+※releaseの場合は「Debug」が「Release」に置き換わる。
+
+```gradle
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+```
+
+#### CI/CD変数の設定
+
+1. 秘密鍵（$FIREBASE_SERVICE_ACCOUNT_KEY_B64）
+   Firebaseの「サービスアカウント」から秘密鍵を取得し、jsonの中身をBase64エンコードしたものを任意の名前でCI/CD変数に設定する。スクリプト側では自身が設定した名前で参照する。
+2. アプリID（$FIREBASE_APP_ID）
+   Firebaseの「設定」から参照できるアプリIDを取得する。秘密鍵と同様に任意の名前でCI/CD変数に設定し、スクリプトから参照する。
 
 ## CI/CDスクリプトの構成
 
@@ -53,7 +96,7 @@ CI/CDは
 ```yml
 build_hogehoge: 　　　 #　ジョブ名 
   stage: build        #　どのステージに属するのか
-  dependencies:       #　ジョブ実行にあたっての前提ジョブ（先行して完了する必要があるジョブ）
+  dependencies:       #　依存ジョブ
     - unit_test
   before_script:      #　メインのスクリプト前に実行されるスクリプト
     - chmod +x ./gradlew
@@ -79,35 +122,9 @@ stages:
   - deploy
 ```
 
-#### 環境変数の定義
-以下の変数定義によってパイプラインで実行する際にアプリの向き先や成果物（apk/aab）種別を選択できる。この変数定義は必須ではない。また、Firebaseにデプロイする際のリリースノートを任意の文字列で入力できる。
-```yml
-# ----------------------------------------
-# 環境選択 (Web UI用)
-# ----------------------------------------
-variables:
-  BUILD_VARIANT:
-    value: "Debug"
-    description: "ビルドするバリアントを選択してください"
-    options:
-      - "Debug"
-      - "Release"
-  
-  GRADLE_TASK_PREFIX:
-    value: "assemble"
-    description: "outputを選択してください"
-    options:
-      - "assemble"
-      - "bundle"
-
-  RELEASE_NOTE_TEXT:
-    value: ""
-    description: "リリースノートに追記する任意のテキスト"
-```
-
 
 #### Dockerイメージの定義
-GitLab上でCI/CDを実行するための実行環境をDockerで定義する。以下では「cimg社」の公開イメージを利用している。プロジェクトによってtargetAPIが異なるため、最適なイメージを利用する。なおCDにおいてFirebase CLIを利用するためにNodeJSがインストールしてある「-node」のイメージを利用する。
+GitLab上でCI/CDを実行するための実行環境をDockerで定義する。以下では「Cirrus CI」の公開イメージを利用している。プロジェクトによってtargetAPIが異なるため、最適なイメージを利用する。
 
 ```yml
 default:
@@ -123,14 +140,12 @@ default:
 ```yml
 lint_check:
   stage: lint
-  before_script:
-    - chmod +x ./gradlew
   script:
-    - ./gradlew lint${BUILD_VARIANT}
+    - bash ./gradlew lintDebug
   artifacts:
     when: always
     paths:
-      - app/build/reports/lint-results-*.html
+      - app/build/reports/lint-results-debug.html
     expire_in: 1 week
 ```
 
@@ -143,18 +158,15 @@ lint_check:
 ```yml
 unit_test:
   stage: test
-  before_script:
-    - chmod +x ./gradlew
   script:
-    - ./gradlew test${BUILD_VARIANT}UnitTest
+    - bash ./gradlew testDebugUnitTest
   artifacts:
     when: always
     reports:
-      junit: app/build/test-results/test${BUILD_VARIANT}UnitTest/TEST-*.xml
+      junit: app/build/test-results/testDebugUnitTest/TEST-*.xml
     paths:
-      - app/build/reports/tests/test${BUILD_VARIANT}UnitTest/
+      - app/build/reports/tests/testDebugUnitTest/
     expire_in: 1 week
-
 ```
 
 #### ビルド
@@ -165,16 +177,11 @@ unit_test:
 ```yml
 build_android:
   stage: build
-  dependencies:
-    - build_android
-  before_script:
-    - chmod +x ./gradlew
   script:
-    - ./gradlew ${GRADLE_TASK_PREFIX}${BUILD_VARIANT}
+    - bash ./gradlew assembleDebug
   artifacts:
     paths:
-      - app/build/outputs/apk/**/*.apk
-      - app/build/outputs/bundle/**/*.aab
+      - app/build/outputs/apk/debug/app-debug.apk
     expire_in: 1 hour
 ```
 
@@ -185,29 +192,22 @@ Firebaseへのデプロイのスクリプト。ビルドジョブで作成され
 ```yml
 deploy_firebase:
   stage: deploy
-  image: node:20-slim 
   dependencies:
-    - replace_env
     - build_android
-  before_script:    
-    - npm install -g firebase-tools
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-android"
+    policy: pull
+  
   script:
     - |
       echo "$FIREBASE_SERVICE_ACCOUNT_KEY_B64" | base64 -d > /tmp/key.json
       export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
       
-      FILE_PATH=$(find app/build/outputs -name "*.apk" -o -name "*.aab" | head -n 1)
-      
-      if [ -z "$FILE_PATH" ]; then
-        echo "Error: Build artifact (.apk or .aab) not found!"
-        exit 1
-      fi
-      
-      echo "Deploying: $FILE_PATH"
-
-      firebase appdistribution:distribute "$FILE_PATH" \
+      # npx で firebase-tools パッケージを指定して実行
+      # 初回はダウンロードされますが、npmのキャッシュが効く場合もあります
+      npx --yes --package firebase-tools firebase appdistribution:distribute app/build/outputs/apk/debug/app-debug.apk \
         --app "$FIREBASE_APP_ID" \
-        --release-notes "${RELEASE_NOTE_TEXT}：$CI_COMMIT_SHORT_SHA" \
+        --release-notes "GitLab CI build: $CI_COMMIT_SHORT_SHA" \
         --groups "group"
 ```
 
@@ -217,9 +217,21 @@ deploy_firebase:
 
 
 
-### `gitlab-ci.yml`の具体例
+#### 具体例
+
+以下がAndroidにおけるCI/CDのスクリプト例。このスクリプトではジョブの高速化のためにキャッシュを有効にしている。
+
 
 ```yml
+# ----------------------------------------
+# パイプライン全体の実行条件
+# ----------------------------------------
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
+    - when: never
+
 stages:
   - lint
   - test
@@ -227,44 +239,36 @@ stages:
   - deploy
 
 # ----------------------------------------
-# 環境選択 (Web UI用)
+# 共通設定 & 変数定義
 # ----------------------------------------
-variables:
-  BUILD_VARIANT:
-    value: "Debug"
-    description: "ビルドするバリアントを選択してください"
-    options:
-      - "Debug"
-      - "Release"
-  
-  GRADLE_TASK_PREFIX:
-    value: "assemble"
-    description: "outputを選択してください"
-    options:
-      - "assemble"
-      - "bundle"
-
-  RELEASE_NOTE_TEXT:
-    value: ""
-    description: "リリースノートに追記する任意のテキスト"
-
-# 共通設定
 default:
   image: cimg/android:2026.01.1-node
+  before_script:
+    - rm -f  .gradle/caches/modules-2/modules-2.lock
+    - rm -fr .gradle/caches/*/plugin-resolution/
+
+variables:
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG-android"
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+  policy: pull-push
 
 # ----------------------------------------
 # 1. 静的解析 (Lint)
 # ----------------------------------------
 lint_check:
   stage: lint
-  before_script:
-    - chmod +x ./gradlew
   script:
-    - ./gradlew lint${BUILD_VARIANT}
+    - bash ./gradlew lintDebug
   artifacts:
     when: always
     paths:
-      - app/build/reports/lint-results-*.html
+      - app/build/reports/lint-results-debug.html
     expire_in: 1 week
 
 # ----------------------------------------
@@ -272,81 +276,48 @@ lint_check:
 # ----------------------------------------
 unit_test:
   stage: test
-  dependencies:
-    - replace_env
-  before_script:
-    - chmod +x ./gradlew
   script:
-    - ./gradlew test${BUILD_VARIANT}UnitTest
+    - bash ./gradlew testDebugUnitTest
   artifacts:
     when: always
     reports:
-      junit: app/build/test-results/test${BUILD_VARIANT}UnitTest/TEST-*.xml
+      junit: app/build/test-results/testDebugUnitTest/TEST-*.xml
     paths:
-      - app/build/reports/tests/test${BUILD_VARIANT}UnitTest/
+      - app/build/reports/tests/testDebugUnitTest/
     expire_in: 1 week
 
 # ----------------------------------------
-# 3. Androidアプリのビルド
+# 3. Androidアプリのビルド (APK生成)
 # ----------------------------------------
 build_android:
   stage: build
-  dependencies:
-    - replace_env
-    - build_android
-  before_script:
-    - chmod +x ./gradlew
   script:
-    - ./gradlew ${GRADLE_TASK_PREFIX}${BUILD_VARIANT}
+    - bash ./gradlew assembleDebug
   artifacts:
     paths:
-      - app/build/outputs/apk/**/*.apk
-      - app/build/outputs/bundle/**/*.aab
+      - app/build/outputs/apk/debug/app-debug.apk
     expire_in: 1 hour
 
 # ----------------------------------------
-# 4. デプロイ (Firebase)
-# ----------------------------------------  
+# 4. Firebase App Distributionへアップロード
+# ----------------------------------------
 deploy_firebase:
   stage: deploy
-  image: node:20-slim 
   dependencies:
-    - replace_env
     - build_android
-  before_script:    
-    - npm install -g firebase-tools
+  cache:
+    key: "$CI_COMMIT_REF_SLUG-android"
+    policy: pull
+  
   script:
     - |
       echo "$FIREBASE_SERVICE_ACCOUNT_KEY_B64" | base64 -d > /tmp/key.json
       export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
       
-      FILE_PATH=$(find app/build/outputs -name "*.apk" -o -name "*.aab" | head -n 1)
-      
-      if [ -z "$FILE_PATH" ]; then
-        echo "Error: Build artifact (.apk or .aab) not found!"
-        exit 1
-      fi
-      
-      echo "Deploying: $FILE_PATH"
-
-      firebase appdistribution:distribute "$FILE_PATH" \
+      npx --yes --package firebase-tools firebase appdistribution:distribute app/build/outputs/apk/debug/app-debug.apk \
         --app "$FIREBASE_APP_ID" \
-        --release-notes "${RELEASE_NOTE_TEXT}：$CI_COMMIT_SHORT_SHA" \
+        --release-notes "GitLab CI build: $CI_COMMIT_SHORT_SHA" \
         --groups "group"
 ```
-
-
-
-### プロジェクト導入にあたっての準備
-
-#### 現行のAndroidプロジェクトの設定の確認
-
-1. プロジェクトのモジュール名、targetAPIの確認
-2. ビルドバリアントの確認
-
-#### Firebaseプロジェクトの設定
-
-1. サービスアカウントの設定
-2. 秘密鍵の取得
 
 
