@@ -1,118 +1,97 @@
-# AndroidのCI/CD導入資料
+# Android CI/CD導入マニュアル
 
-```
-・適宜画像での説明を追加
-・構成を見直す
-・導入にあたっての部分を加筆
-```
-
-- [AndroidのCI/CD導入資料](#androidのcicd導入資料)
+- [Android CI/CD導入マニュアル](#android-cicd導入マニュアル)
   - [はじめに](#はじめに)
   - [本資料のゴール](#本資料のゴール)
-  - [必要知識](#必要知識)
-  - [前提](#前提)
-  - [導入後のアプリ配信までのフロー](#導入後のアプリ配信までのフロー)
+  - [必要な知識](#必要な知識)
+  - [前提条件](#前提条件)
+  - [導入後のアプリ配信フロー](#導入後のアプリ配信フロー)
   - [CI/CDの概要](#cicdの概要)
     - [導入にあたっての準備](#導入にあたっての準備)
       - [ビルドバリアントの確認](#ビルドバリアントの確認)
       - [CI/CD変数の設定](#cicd変数の設定)
   - [CI/CDスクリプトの構成](#cicdスクリプトの構成)
-      - [ジョブ定義に関する説明](#ジョブ定義に関する説明)
-      - [ステージの定義](#ステージの定義)
-      - [Dockerイメージの定義](#dockerイメージの定義)
-      - [静的解析 (Lint)](#静的解析-lint)
-      - [ユニットテスト (Unit Test)](#ユニットテスト-unit-test)
-      - [ビルド](#ビルド)
-      - [デプロイ](#デプロイ)
-      - [具体例](#具体例)
-
-
-
-
+    - [ジョブ定義に関する説明](#ジョブ定義に関する説明)
+    - [ステージの定義](#ステージの定義)
+    - [Dockerイメージの定義](#dockerイメージの定義)
+    - [静的解析 (Lint)](#静的解析-lint)
+    - [ユニットテスト (Unit Test)](#ユニットテスト-unit-test)
+    - [ビルド](#ビルド)
+    - [デプロイ](#デプロイ)
+    - [スクリプト全体像](#スクリプト全体像)
+  - [参考資料](#参考資料)
 
 ## はじめに
-本資料はGitLab上でAndroidのCI/CDを実現するための導入資料である。
-AndroidのサンプルプロジェクトをベースにCI/CDの具体的な実現方法を説明する。
-
+本資料は、GitLab CI/CDを利用してAndroidアプリケーションのビルドからデプロイまでを自動化するプロセスの導入手順を解説するものです。
+サンプルプロジェクトをベースに、具体的な実現方法を説明します。
 
 ## 本資料のゴール
-GitLab上でパイプラインを実行することで、Androidのアプリケーションのビルドが実行され、Firebase AppDistributionにアプリがデプロイできるCI/CDスクリプトが作成できるようになること。
+GitLab CI/CDを使い、AndroidアプリのビルドからFirebase App Distributionへのデプロイまでを自動化するパイプラインスクリプトを作成できるようになること。
 
+## 必要な知識
+1.  GitLab CI/CDに関する基本的な知識
+2.  Androidのビルド設定（`build.gradle`）に関する知識
+3.  Firebase App Distributionに関する基本的な知識
 
-## 必要知識
-1. GitLab CI/CDに関する知識
-2. Androidのビルド設定に関する知識
-3. Firebase AppDistributionに関する知識
+## 前提条件
+1.  対象のAndroidプロジェクトにFirebaseが導入済みであること。
+2.  ソースコードのバージョン管理をGitLabで行っていること。
+3.  GitLabプロジェクトのCI/CD変数を編集する権限を持っていること。
 
+## 導入後のアプリ配信フロー
+従来の手動によるビルド、検証環境へのアップロード、アプリ配信といったフローを、CI/CDの導入によって以下のように改善できます。
+開発者が行う作業はパイプラインの実行のみとなり、その後のプロセスはCI/CDによって自動化されます。
+また、ビルド環境がDockerコンテナに統一されるため、開発者ごとの環境差異によるトラブルを未然に防ぐことができます。
 
-## 前提
-1. Firebaseが導入されていること
-2. バージョン管理をGitLabで行なっていること
-3. GitLabのCI/CD変数の編集権限を持っていること
-
-
-## 導入後のアプリ配信までのフロー
-従来の人間が開発環境でビルドをして検証環境に成果物をアップロードしてアプリ配信を行うフローを以下のように改善できる。
-人間が行うことは最初のパイプライン実行のみで、それ以降はCI/CDによって自動的に処理される。
-また、ビルド環境がDockerに依存するため開発環境の違いによるトラブルを軽減できる。
-
-1. GitLab上でパイプラインを実行
-2. パイプライン完了まで10分程度待つ
-3. Firebaseにアプリがデプロイされる
-
+1.  GitLab上でパイプラインを手動または自動で実行する。
+2.  パイプラインが完了するまで待つ（10分程度）。
+3.  Firebase App Distributionに新しいバージョンのアプリが配信される。
 
 ## CI/CDの概要
-CI/CDは
-本資料においてCIについては「静的解析」「テスト」「ビルド」を対象とし、CDについては「デプロイ」を対象とする。
+本資料におけるCI/CDのスコープは以下の通りです。
+*   **CI (Continuous Integration)**: 静的解析、テスト、ビルド
+*   **CD (Continuous Delivery/Deployment)**: デプロイ
 
 ### 導入にあたっての準備
 
 #### ビルドバリアントの確認
-モジュールレベルの`build.gradle`を参照し、必要なビルドタイプでCI/CDスクリプトを定義する。
-以下はAndroidプロジェクトのデフォルト状態の場合に定義されているビルドタイプ。「debug」は明示的に定義せずに利用できる（特別な設定を行いたい場合は別途定義する）。
-ビルドタイプはgradleを合わせて利用し、ビルドタイプが「debug」でapkを作成したい場合は「assembleDebug」、aabファイルを作成したい場合は「bundleDebug」など。
-※releaseの場合は「Debug」が「Release」に置き換わる。
+モジュールレベルの`build.gradle`ファイルを参照し、CI/CDで利用したいビルドタイプ（例: `debug`, `release`）を確認します。
+Gradleタスクはビルドバリアントと組み合わせて利用します。例えば、`debug`ビルドでAPKを作成したい場合は`assembleDebug`、AABを作成したい場合は`bundleDebug`を実行します。
+`release`ビルドの場合は、タスク名の`Debug`が`Release`に置き換わります（例: `assembleRelease`）。
 
 ```gradle
+// app/build.gradle
+
+android {
+    // ...
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        // 'debug' はデフォルトで定義されています
     }
+}
 ```
 
 #### CI/CD変数の設定
+セキュリティ情報など、リポジトリに直接含めたくない値はGitLabのCI/CD変数として設定します。
 
-1. 秘密鍵（$FIREBASE_SERVICE_ACCOUNT_KEY_B64）
-   Firebaseの「サービスアカウント」から秘密鍵を取得し、jsonの中身をBase64エンコードしたものを任意の名前でCI/CD変数に設定する。スクリプト側では自身が設定した名前で参照する。
-2. アプリID（$FIREBASE_APP_ID）
-   Firebaseの「設定」から参照できるアプリIDを取得する。秘密鍵と同様に任意の名前でCI/CD変数に設定し、スクリプトから参照する。
+1.  **Firebaseサービスアカウントキー (`FIREBASE_SERVICE_ACCOUNT_KEY_B64`)**
+    Firebaseコンソールの「プロジェクトの設定 > サービスアカウント」から新しい秘密鍵を生成し、ダウンロードしたJSONファイルの中身全体を**Base64エンコード**します。エンコードした文字列をCI/CD変数として設定します。
+
+2.  **FirebaseアプリID (`FIREBASE_APP_ID`)**
+    Firebaseコンソールの「プロジェクトの設定」から対象アプリの「アプリID」をコピーし、CI/CD変数として設定します。
 
 ## CI/CDスクリプトの構成
+`.gitlab-ci.yml`ファイルにCI/CDのパイプラインを定義します。
 
 #### ジョブ定義に関する説明
-
-```yml
-build_hogehoge: 　　　 #　ジョブ名 
-  stage: build        #　どのステージに属するのか
-  dependencies:       #　依存ジョブ
-    - unit_test
-  before_script:      #　メインのスクリプト前に実行されるスクリプト
-    - chmod +x ./gradlew
-  script:             #　メインのスクリプトの記述部分
-    - ./gradlew assembleDebug
-  artifacts:          #　ジョブの成果物。成果物はzipでダウンロードが可能。
-    paths:
-      - app/build/outputs/apk/debug/app-debug.apk
-    expire_in: 1 hour #　成果物の保存期間（長くし過ぎるとストレージを圧迫する）　
-```
-
-**※以下は構成の一例。プロジェクトによって必要なスクリプトは異なる**
+**※以下は構成の一例です。プロジェクトの要件に応じて内容は適宜変更してください。**
 
 #### ステージの定義
-ステージでは明示的にどういったジョブがあるのか定義する（必須ではないが推奨される）。
-本資料ではlint（静的解析）、test（ユニットテスト）、build（ビルド）、deploy（デプロイ）のステージとして定義する。
+`stages`キーワードで、パイプラインで実行するジョブの順序を定義します（必須ではありませんが強く推奨されます）。
+ここでは、静的解析、テスト、ビルド、デプロイの順でステージを定義します。
 
 ```yml
 stages:
@@ -122,26 +101,23 @@ stages:
   - deploy
 ```
 
-
 #### Dockerイメージの定義
-GitLab上でCI/CDを実行するための実行環境をDockerで定義する。以下では「Cirrus CI」の公開イメージを利用している。プロジェクトによってtargetAPIが異なるため、最適なイメージを利用する。
+`image`キーワードで、CI/CDジョブを実行するDockerイメージを指定します。
+ここでは、一般的なAndroid開発に必要なツールが含まれた`cimg/android`イメージを利用しています。プロジェクトで利用するAndroid APIレベルやNode.jsのバージョンに応じて、最適なイメージのタグを選択してください。
 
 ```yml
 default:
   image: cimg/android:2026.01.1-node
 ```
 
-
 #### 静的解析 (Lint)
-
-一般的なAndroidプロジェクトであれば以下のスクリプトで性的解析が実行可能。成果物はジョブのArtifactとして出力され、完了後に別途ダウンロードできる。
-
+`lint`タスクを実行し、コード品質をチェックします。`artifacts`を指定することで、ジョブの成果物（ここではHTMLレポート）を保存し、GitLabのUIからダウンロードできるようにします。
 
 ```yml
 lint_check:
   stage: lint
   script:
-    - bash ./gradlew lintDebug
+    - ./gradlew lintDebug
   artifacts:
     when: always
     paths:
@@ -149,17 +125,14 @@ lint_check:
     expire_in: 1 week
 ```
 
-
-
 #### ユニットテスト (Unit Test)
-
-一般的なAndroidプロジェクトであれば以下のスクリプトで単体テストが実行可能。必要に応じてユニットテストコードを実装する。成果物はジョブのArtifactとして出力され、完了後に別途ダウンロードできる。
+`test`タスクを実行し、ユニットテストを実施します。`reports: junit`を指定することで、テスト結果をGitLabのUI上で視覚的に確認できるようになります。
 
 ```yml
 unit_test:
   stage: test
   script:
-    - bash ./gradlew testDebugUnitTest
+    - ./gradlew testDebugUnitTest
   artifacts:
     when: always
     reports:
@@ -170,15 +143,13 @@ unit_test:
 ```
 
 #### ビルド
-
-一般的なAndroidプロジェクトであれば以下のスクリプトでビルドが実行可能。成果物を次のジョブのArtifactとして出力され、として利用する。また成果物の有効期限を1hに制限して、ストレージの圧迫を防ぐ。
-
+`assemble`または`bundle`タスクを実行し、APKまたはAABファイルを生成します。この成果物は後続の`deploy`ジョブで利用するため、`artifacts`として出力します。ストレージの圧迫を防ぐため、有効期限（`expire_in`）は短めに設定することが推奨されます。
 
 ```yml
 build_android:
   stage: build
   script:
-    - bash ./gradlew assembleDebug
+    - ./gradlew assembleDebug
   artifacts:
     paths:
       - app/build/outputs/apk/debug/app-debug.apk
@@ -186,41 +157,27 @@ build_android:
 ```
 
 #### デプロイ
-
-Firebaseへのデプロイのスクリプト。ビルドジョブで作成された成果物（aab/apk）をFirebaseに対してデプロイする。デプロイにあたってFirebaseプロジェクトから秘密鍵を取得し、GitLabのCI/CD変数に設定しておく。下記スクリプトでは秘密鍵の内容をBase64でエンコードして変数に設定し、スクリプト内ででコードして利用している。主にデプロイを担当するスクリプトは`firebase appdistribution:distribute`の部分。
+`build`ステージで生成されたアプリファイルを、Firebase App Distributionにアップロードします。
+デプロイ処理の核となるのは`firebase appdistribution:distribute`コマンドです。
+`--groups`には、配信先のテスターグループ名を指定します。`"group"`の部分は実際のグループ名に置き換えてください。
 
 ```yml
 deploy_firebase:
   stage: deploy
   dependencies:
     - build_android
-  cache:
-    key: "$CI_COMMIT_REF_SLUG-android"
-    policy: pull
-  
   script:
+    - echo "$FIREBASE_SERVICE_ACCOUNT_KEY_B64" | base64 -d > /tmp/key.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
     - |
-      echo "$FIREBASE_SERVICE_ACCOUNT_KEY_B64" | base64 -d > /tmp/key.json
-      export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
-      
-      # npx で firebase-tools パッケージを指定して実行
-      # 初回はダウンロードされますが、npmのキャッシュが効く場合もあります
-      npx --yes --package firebase-tools firebase appdistribution:distribute app/build/outputs/apk/debug/app-debug.apk \
+      npx --yes firebase-tools appdistribution:distribute app/build/outputs/apk/debug/app-debug.apk \
         --app "$FIREBASE_APP_ID" \
         --release-notes "GitLab CI build: $CI_COMMIT_SHORT_SHA" \
         --groups "group"
 ```
 
-
-
-
-
-
-
-#### 具体例
-
-以下がAndroidにおけるCI/CDのスクリプト例。このスクリプトではジョブの高速化のためにキャッシュを有効にしている。
-
+### スクリプト全体像
+以下は、これまで説明した内容をまとめた`.gitlab-ci.yml`の全体像です。キャッシュ設定などを追加し、より実践的な内容になっています。
 
 ```yml
 # ----------------------------------------
@@ -228,9 +185,9 @@ deploy_firebase:
 # ----------------------------------------
 workflow:
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "web"' # GitLabのWeb UIから手動実行された場合のみ
       when: always
-    - when: never
+    - when: never # 上記以外は実行しない
 
 stages:
   - lint
@@ -264,7 +221,7 @@ cache:
 lint_check:
   stage: lint
   script:
-    - bash ./gradlew lintDebug
+    - ./gradlew lintDebug
   artifacts:
     when: always
     paths:
@@ -277,7 +234,7 @@ lint_check:
 unit_test:
   stage: test
   script:
-    - bash ./gradlew testDebugUnitTest
+    - ./gradlew testDebugUnitTest
   artifacts:
     when: always
     reports:
@@ -292,7 +249,7 @@ unit_test:
 build_android:
   stage: build
   script:
-    - bash ./gradlew assembleDebug
+    - ./gradlew assembleDebug
   artifacts:
     paths:
       - app/build/outputs/apk/debug/app-debug.apk
@@ -305,19 +262,20 @@ deploy_firebase:
   stage: deploy
   dependencies:
     - build_android
-  cache:
+  cache: # deployジョブではビルドキャッシュは不要なため、pullのみに設定
     key: "$CI_COMMIT_REF_SLUG-android"
     policy: pull
-  
   script:
+    - echo "$FIREBASE_SERVICE_ACCOUNT_KEY_B64" | base64 -d > /tmp/key.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
     - |
-      echo "$FIREBASE_SERVICE_ACCOUNT_KEY_B64" | base64 -d > /tmp/key.json
-      export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
-      
-      npx --yes --package firebase-tools firebase appdistribution:distribute app/build/outputs/apk/debug/app-debug.apk \
+      npx --yes firebase-tools appdistribution:distribute app/build/outputs/apk/debug/app-debug.apk \
         --app "$FIREBASE_APP_ID" \
-        --release-notes "GitLab CI build: $CI_COMMIT_SHORT_SHA" \
-        --groups "group"
+        --release-notes "GitLab CI build from commit $CI_COMMIT_SHORT_SHA" \
+        --groups "testers" # 'testers'は実際のテスターグループ名に置き換えてください
 ```
 
-
+## 参考資料
+(ここに関連する公式ドキュメントなどへのリンクを記載します)
+*   [GitLab CI/CD Documentation](https://docs.gitlab.com/ee/ci/)
+*   [Firebase App Distribution CLI Reference](https://firebase.google.com/docs/app-distribution/cli-reference)
