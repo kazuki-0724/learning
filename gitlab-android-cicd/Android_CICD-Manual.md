@@ -22,8 +22,8 @@
   - [参考資料](#参考資料)
 
 ## はじめに
-本資料は、GitLab CI/CDを利用してAndroidアプリケーションのビルドからデプロイまでを自動化するプロセスの導入手順を解説するものです。
-サンプルプロジェクトをベースに、具体的な実現方法を説明します。
+本資料は、GitLab CI/CDを利用してAndroidアプリケーションのビルドからデプロイまでを自動化するプロセスの導入手順を解説するものである。
+サンプルプロジェクトをベースに、具体的な実現方法を説明する。
 
 ## 本資料のゴール
 GitLab CI/CDを使い、AndroidアプリのビルドからFirebase App Distributionへのデプロイまでを自動化するパイプラインスクリプトを作成できるようになること。
@@ -39,25 +39,32 @@ GitLab CI/CDを使い、AndroidアプリのビルドからFirebase App Distribut
 3.  GitLabプロジェクトのCI/CD変数を編集する権限を持っていること。
 
 ## 導入後のアプリ配信フロー
-従来の手動によるビルド、検証環境へのアップロード、アプリ配信といったフローを、CI/CDの導入によって以下のように改善できます。
-開発者が行う作業はパイプラインの実行のみとなり、その後のプロセスはCI/CDによって自動化されます。
-また、ビルド環境がDockerコンテナに統一されるため、開発者ごとの環境差異によるトラブルを未然に防ぐことができます。
+従来の手動によるビルド、検証環境へのアップロード、アプリ配信といったフローを、CI/CDの導入によって以下のように改善できる。
+開発者が行う作業はパイプラインの実行のみとなり、その後のプロセスはCI/CDによって自動化される。
+また、ビルド環境がDockerコンテナに統一されるため、開発者ごとの環境差異によるトラブルを未然に防ぐことができる。
+
+
 
 1.  GitLab上でパイプラインを手動または自動で実行する。
-2.  パイプラインが完了するまで待つ（10分程度）。
+<img src="./assets/GitLab_CICD_Pipeline.png" alt="パイプライン新規作成" width="600">
+<img src="./assets/GitLab_CICD_Start.png" alt="パイプライン実行" width="600">
+2.  パイプラインが完了するまで待つ。
+<img src="./assets/GitLab_CICD_Complete.png" alt="パイプライン完了" width="600">
 3.  Firebase App Distributionに新しいバージョンのアプリが配信される。
+<img src="./assets/Firebase_Web_Console.png" alt="Firebase_Web_Console" width="600">
+<!-- <img src="./assets/Firebase_Android.jpg" alt="Firebase_Android" width="300"> -->
 
 ## CI/CDの概要
-本資料におけるCI/CDのスコープは以下の通りです。
+本資料におけるCI/CDのスコープは以下の通り。
 *   **CI (Continuous Integration)**: 静的解析、テスト、ビルド
 *   **CD (Continuous Delivery/Deployment)**: デプロイ
 
 ### 導入にあたっての準備
 
 #### ビルドバリアントの確認
-モジュールレベルの`build.gradle`ファイルを参照し、CI/CDで利用したいビルドタイプ（例: `debug`, `release`）を確認します。
-Gradleタスクはビルドバリアントと組み合わせて利用します。例えば、`debug`ビルドでAPKを作成したい場合は`assembleDebug`、AABを作成したい場合は`bundleDebug`を実行します。
-`release`ビルドの場合は、タスク名の`Debug`が`Release`に置き換わります（例: `assembleRelease`）。
+モジュールレベルの`build.gradle`ファイルを参照し、CI/CDで利用したいビルドタイプ（例: `debug`, `release`）を確認する。
+Gradleタスクはビルドバリアントと組み合わせて利用する。例えば、`debug`ビルドでAPKを作成したい場合は`assembleDebug`、AABを作成したい場合は`bundleDebug`を実行する。
+`release`ビルドの場合は、タスク名の`Debug`が`Release`に置き換わる（例: `assembleRelease`）。
 
 ```gradle
 // app/build.gradle
@@ -69,29 +76,29 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-        // 'debug' はデフォルトで定義されています
+        // 'debug' はデフォルトで定義されている
     }
 }
 ```
 
 #### CI/CD変数の設定
-セキュリティ情報など、リポジトリに直接含めたくない値はGitLabのCI/CD変数として設定します。
+セキュリティ情報など、リポジトリに直接含めたくない値はGitLabのCI/CD変数として設定する。
 
 1.  **Firebaseサービスアカウントキー (`FIREBASE_SERVICE_ACCOUNT_KEY_B64`)**
-    Firebaseコンソールの「プロジェクトの設定 > サービスアカウント」から新しい秘密鍵を生成し、ダウンロードしたJSONファイルの中身全体を**Base64エンコード**します。エンコードした文字列をCI/CD変数として設定します。
+    Firebaseコンソールの「プロジェクトの設定 > サービスアカウント」から新しい秘密鍵を生成し、ダウンロードしたJSONファイルの中身全体を**Base64エンコード**する。エンコードした文字列をCI/CD変数として設定する。
 
 2.  **FirebaseアプリID (`FIREBASE_APP_ID`)**
-    Firebaseコンソールの「プロジェクトの設定」から対象アプリの「アプリID」をコピーし、CI/CD変数として設定します。
+    Firebaseコンソールの「プロジェクトの設定」から対象アプリの「アプリID」をコピーし、CI/CD変数として設定する。
 
 ## CI/CDスクリプトの構成
-`.gitlab-ci.yml`ファイルにCI/CDのパイプラインを定義します。
+`.gitlab-ci.yml`ファイルにCI/CDのパイプラインを定義する。
 
 #### ジョブ定義に関する説明
-**※以下は構成の一例です。プロジェクトの要件に応じて内容は適宜変更してください。**
+**※以下は構成の一例である。プロジェクトの要件に応じて内容は適宜変更。**
 
 #### ステージの定義
-`stages`キーワードで、パイプラインで実行するジョブの順序を定義します（必須ではありませんが強く推奨されます）。
-ここでは、静的解析、テスト、ビルド、デプロイの順でステージを定義します。
+`stages`キーワードで、パイプラインで実行するジョブの順序を定義する（必須ではないが推奨）。
+ここでは、静的解析、テスト、ビルド、デプロイの順でステージを定義する。
 
 ```yml
 stages:
@@ -102,8 +109,8 @@ stages:
 ```
 
 #### Dockerイメージの定義
-`image`キーワードで、CI/CDジョブを実行するDockerイメージを指定します。
-ここでは、一般的なAndroid開発に必要なツールが含まれた`cimg/android`イメージを利用しています。プロジェクトで利用するAndroid APIレベルやNode.jsのバージョンに応じて、最適なイメージのタグを選択してください。
+`image`キーワードで、CI/CDジョブを実行するDockerイメージを指定する。
+ここでは、一般的なAndroid開発に必要なツールが含まれた`cimg/android`イメージを利用する。プロジェクトで利用するAndroid APIレベルやNode.jsのバージョンに応じて、最適なイメージのタグを選択する必要がある。
 
 ```yml
 default:
@@ -111,7 +118,7 @@ default:
 ```
 
 #### 静的解析 (Lint)
-`lint`タスクを実行し、コード品質をチェックします。`artifacts`を指定することで、ジョブの成果物（ここではHTMLレポート）を保存し、GitLabのUIからダウンロードできるようにします。
+`lint`タスクを実行し、コード品質をチェックする。`artifacts`を指定することで、ジョブの成果物（ここではHTMLレポート）を保存し、GitLabのUIからダウンロードできるようになる。
 
 ```yml
 lint_check:
@@ -126,7 +133,7 @@ lint_check:
 ```
 
 #### ユニットテスト (Unit Test)
-`test`タスクを実行し、ユニットテストを実施します。`reports: junit`を指定することで、テスト結果をGitLabのUI上で視覚的に確認できるようになります。
+`test`タスクを実行し、ユニットテストを実施する。`reports: junit`を指定することで、テスト結果をGitLabのUI上で視覚的に確認できるようになる。
 
 ```yml
 unit_test:
@@ -143,7 +150,7 @@ unit_test:
 ```
 
 #### ビルド
-`assemble`または`bundle`タスクを実行し、APKまたはAABファイルを生成します。この成果物は後続の`deploy`ジョブで利用するため、`artifacts`として出力します。ストレージの圧迫を防ぐため、有効期限（`expire_in`）は短めに設定することが推奨されます。
+`assemble`または`bundle`タスクを実行し、APKまたはAABファイルを生成する。この成果物は後続の`deploy`ジョブで利用するため、`artifacts`として出力しておく。ストレージの圧迫を防ぐため、有効期限（`expire_in`）は短めに設定することが推奨される。
 
 ```yml
 build_android:
@@ -157,9 +164,9 @@ build_android:
 ```
 
 #### デプロイ
-`build`ステージで生成されたアプリファイルを、Firebase App Distributionにアップロードします。
-デプロイ処理の核となるのは`firebase appdistribution:distribute`コマンドです。
-`--groups`には、配信先のテスターグループ名を指定します。`"group"`の部分は実際のグループ名に置き換えてください。
+`build`ステージで生成されたアプリファイルを、Firebase App Distributionにアップロードする。
+デプロイ処理の核となるのは`firebase appdistribution:distribute`コマンド。
+`--groups`には、配信先のテスターグループ名を指定する。`"group"`の部分は実際のグループ名に置き換える必要がある。
 
 ```yml
 deploy_firebase:
@@ -177,7 +184,7 @@ deploy_firebase:
 ```
 
 ### スクリプト全体像
-以下は、これまで説明した内容をまとめた`.gitlab-ci.yml`の全体像です。キャッシュ設定などを追加し、より実践的な内容になっています。
+以下は、これまで説明した内容をまとめた`.gitlab-ci.yml`の全体像である。キャッシュ設定などを追加し、より実践的な内容になっている。
 
 ```yml
 # ----------------------------------------
@@ -276,6 +283,5 @@ deploy_firebase:
 ```
 
 ## 参考資料
-(ここに関連する公式ドキュメントなどへのリンクを記載します)
 *   [GitLab CI/CD Documentation](https://docs.gitlab.com/ee/ci/)
 *   [Firebase App Distribution CLI Reference](https://firebase.google.com/docs/app-distribution/cli-reference)
